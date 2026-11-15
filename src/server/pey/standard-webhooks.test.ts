@@ -1,5 +1,5 @@
-import { createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
+import { signedHeaders, webhookSecret } from "../../../test/pey";
 import { verifyStandardWebhook } from "./standard-webhooks";
 
 const vector = {
@@ -40,8 +40,7 @@ describe("verifyStandardWebhook", () => {
   });
 
   it("rejects a different secret", () => {
-    const other = "whsec_" + Buffer.from("another secret").toString("base64");
-    expect(verify(vector.body, headers(), other).ok).toBe(false);
+    expect(verify(vector.body, headers(), webhookSecret(Buffer.from("another secret"))).ok).toBe(false);
   });
 
   it("rejects a different webhook id with the same signature", () => {
@@ -73,9 +72,8 @@ describe("verifyStandardWebhook", () => {
 
   it("accepts a signature made with the raw secret bytes", () => {
     const key = Buffer.from("raw-secret-bytes");
-    const secret = "whsec_" + key.toString("base64");
     const body = '{"type":"codi.qr.payment_received"}';
-    const signature = createHmac("sha256", key).update(`${vector.id}.${vector.timestamp}.${body}`).digest("base64");
-    expect(verify(body, headers({ "webhook-signature": `v1,${signature}` }), secret).ok).toBe(true);
+    const h = signedHeaders({ key, id: vector.id, timestamp: vector.timestamp, body });
+    expect(verify(body, h, webhookSecret(key)).ok).toBe(true);
   });
 });

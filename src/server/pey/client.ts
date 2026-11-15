@@ -1,6 +1,8 @@
 import "server-only";
+import type { Phone } from "../validation/phone";
 import { isDemoMode, requireEnv } from "../env";
 import { assertChargeAllowed, centsToPesos } from "./charge-rules";
+import type { PeyMetadata } from "./webhook-event";
 
 const BASE_URL = "https://api.pey.mx";
 
@@ -14,8 +16,6 @@ export class PeyError extends Error {
     super(message);
   }
 }
-
-type Metadata = Record<string, string | number | boolean | null>;
 
 async function peyFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -40,58 +40,43 @@ async function peyFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   return body as T;
 }
 
-export type CreateQrResult = { id: string; qrString: string; qrImage?: string | null };
-
-export function createCodiQr(input: {
+type Charge = {
   amountCents: number;
   concept: string;
   expirationSeconds: number;
   numRef: string;
-  metadata: Metadata;
-  generateImage?: boolean;
-}): Promise<CreateQrResult> {
-  assertChargeAllowed(input.amountCents, isDemoMode());
-  return peyFetch("/codi/qr", {
+  metadata: PeyMetadata;
+};
+
+function postCharge<T>(path: string, charge: Charge, extra: Record<string, unknown>): Promise<T> {
+  assertChargeAllowed(charge.amountCents, isDemoMode());
+  return peyFetch(path, {
     method: "POST",
     body: JSON.stringify({
-      amount: centsToPesos(input.amountCents),
-      concept: input.concept,
-      expiration: input.expirationSeconds,
-      numRef: input.numRef,
-      generateImage: input.generateImage ?? true,
-      metadata: input.metadata,
+      amount: centsToPesos(charge.amountCents),
+      concept: charge.concept,
+      expiration: charge.expirationSeconds,
+      numRef: charge.numRef,
+      metadata: charge.metadata,
+      ...extra,
     }),
   });
 }
 
-export type CreatePushResult = { transactionId: string; codiId: string };
-
-export function createCodiPush(input: {
-  amountCents: number;
-  phoneNumber: string;
-  concept: string;
-  expirationSeconds: number;
-  numRef: string;
-  metadata: Metadata;
-}): Promise<CreatePushResult> {
-  assertChargeAllowed(input.amountCents, isDemoMode());
-  if (!/^[0-9]{10}$/.test(input.phoneNumber)) {
-    throw new Error("Phone number must be exactly 10 digits");
-  }
-  return peyFetch("/codi/pn", {
-    method: "POST",
-    body: JSON.stringify({
-      amount: centsToPesos(input.amountCents),
-      phoneNumber: input.phoneNumber,
-      concept: input.concept,
-      expiration: input.expirationSeconds,
-      numRef: input.numRef,
-      metadata: input.metadata,
-    }),
-  });
+export function createCodiQr(
+  charge: Charge,
+): Promise<{ id: string; qrString: string; qrImage?: string | null }> {
+  return postCharge("/codi/qr", charge, { generateImage: true });
 }
 
-export type PeyTransaction = {
+export function createCodiPush(
+  charge: Charge & { phoneNumber: Phone },
+): Promise<{ transactionId: string; codiId: string }> {
+  const { phoneNumber, ...rest } = charge;
+  return postCharge("/codi/pn", rest, { phoneNumber });
+}
+
+type PeyTransaction = {
   id: string;
   status: "PENDING" | "PAID";
   amount: number;

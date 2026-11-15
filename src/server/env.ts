@@ -7,5 +7,5 @@ export function requireEnv(name: string): string {
 }
 
 export function isDemoMode(): boolean {
-  return process.env.DEMO_MODE === "true";
+  return process.env.DEMO_MODE !== "false";
 }

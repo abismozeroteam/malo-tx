@@ -7,16 +7,21 @@ if (!url) {
   console.log("[migrate] DATABASE_URL is not set, skipping migrations.");
   process.exit(0);
 }
+if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") {
+  console.log(`[migrate] ${process.env.VERCEL_ENV} build, skipping migrations.`);
+  process.exit(0);
+}
 
 const sql = neon(url);
 const dir = path.join(process.cwd(), "db", "migrations");
 
-await sql.query(
-  "CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())",
-);
-const applied = new Set(
-  (await sql.query("SELECT name FROM schema_migrations")).map((r) => r.name),
-);
+const [, appliedRows] = await sql.transaction([
+  sql.query(
+    "CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())",
+  ),
+  sql.query("SELECT name FROM schema_migrations"),
+]);
+const applied = new Set(appliedRows.map((r) => r.name));
 
 const files = (await readdir(dir)).filter((f) => f.endsWith(".sql")).sort();
 for (const file of files) {

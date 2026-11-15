@@ -3,7 +3,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 const MAX_DELIVERY_AGE_SECONDS = 5 * 60;
 
-export type VerifyResult =
+type VerifyResult =
   | { ok: true; webhookId: string }
   | { ok: false; reason: string };
 

@@ -47,7 +47,6 @@ async function runSmokeAction(request: SmokeRequest) {
         expirationSeconds: 600,
         numRef: "1",
         metadata: { test: "smoke", kind: "qr" },
-        generateImage: true,
       });
       return { id: qr.id, qrString: qr.qrString, qrImage: qr.qrImage ?? null };
     }

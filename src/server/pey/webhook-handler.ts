@@ -1,6 +1,6 @@
 import { pesosToCents } from "./charge-rules";
 import { verifyStandardWebhook } from "./standard-webhooks";
-import { maskEvent, peyEventSchema, type PeyEvent } from "./webhook-event";
+import { isPaymentEvent, maskEvent, peyEventSchema, type PeyEvent } from "./webhook-event";
 
 export type StoredPeyEvent = {
   webhookId: string;
@@ -15,7 +15,7 @@ export interface PeyEventStore {
   save(event: StoredPeyEvent): Promise<"stored" | "duplicate">;
 }
 
-export type WebhookResult = { status: number; body: Record<string, unknown>; log: string };
+type WebhookResult = { status: number; body: Record<string, unknown>; log: string };
 
 export async function handlePeyWebhook(input: {
   rawBody: string;
@@ -46,18 +46,19 @@ export async function handlePeyWebhook(input: {
   }
 
   const event = parsed.data;
+  const payment = isPaymentEvent(event) ? event : null;
   const outcome = await input.store.save({
     webhookId: verified.webhookId,
     eventType: event.type,
-    transactionId: event.transactionId ?? null,
-    amountCents: event.amount === undefined ? null : pesosToCents(event.amount),
-    datePaid: event.datePaid ? new Date(event.datePaid * 1000) : null,
+    transactionId: payment?.transactionId ?? null,
+    amountCents: payment ? pesosToCents(payment.amount) : null,
+    datePaid: payment?.datePaid ? new Date(payment.datePaid * 1000) : null,
     payload: maskEvent(event),
   });
 
   return {
     status: 200,
     body: { received: true, duplicate: outcome === "duplicate" },
-    log: `${outcome} type=${event.type} webhookId=${verified.webhookId} transactionId=${event.transactionId ?? "-"}`,
+    log: `${outcome} type=${event.type} webhookId=${verified.webhookId} transactionId=${payment?.transactionId ?? "-"}`,
   };
 }

@@ -1,4 +1,4 @@
-export const DEMO_MAX_CENTS = 1;
+const DEMO_MAX_CENTS = 1;
 
 export class ChargeNotAllowedError extends Error {}
 
