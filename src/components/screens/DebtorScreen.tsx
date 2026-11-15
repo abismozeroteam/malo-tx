@@ -74,7 +74,7 @@ function OpenView({ data, actions }: { data: OpenData; actions: DebtorPageAction
 
       {data.status === "pending" && (
         <>
-          <h1 className="text-title leading-heading">{t.owesTo(data.debtorName, data.creditorName)}</h1>
+          <PageHeading title={t.owesTo(data.debtorName, data.creditorName)} />
           <p className="flex flex-wrap items-center gap-2 text-body leading-ui text-muted">
             {data.debtName}
             {data.dueDate && ` · ${t.payBefore(formatDate(data.dueDate))}`}

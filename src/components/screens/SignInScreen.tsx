@@ -21,8 +21,7 @@ export function SignInScreen({ data, actions }: { data: SignInData; actions: Sig
     return (
       <Screen className="justify-center text-center">
         <Wordmark className="self-center" />
-        <h1 className="text-title">{t.done}</h1>
-        <p className="text-body text-muted">{t.doneHint}</p>
+        <PageHeading title={t.done} lead={t.doneHint} />
       </Screen>
     );
   }
@@ -58,7 +57,7 @@ function PhoneStep({
     <Screen>
       <Wordmark className="self-center" />
       <section className="flex flex-1 flex-col justify-center gap-2 text-center">
-        <h1 className="text-subtitle leading-ui">{es.landing.headline}</h1>
+        <PageHeading size="subtitle" title={es.landing.headline} />
         <p className="text-lead leading-ui">{es.landing.lead}</p>
       </section>
       <form onSubmit={submit} className="flex w-full flex-col gap-4">

@@ -8,6 +8,7 @@ import { DebtFormScreen } from "@/components/screens/DebtFormScreen";
 import { DebtorScreen } from "@/components/screens/DebtorScreen";
 import { LandingScreen } from "@/components/screens/LandingScreen";
 import { SignInScreen } from "@/components/screens/SignInScreen";
+import { PageHeading } from "@/components/ui/PageHeading";
 import { dashboardActionsFixture, debtFormActionsFixture, debtorActionsFixture, signInActionsFixture } from "@/fixtures/actions";
 import { dashboardFixtures } from "@/fixtures/dashboard";
 import { createdDebtFixture, debtFormFixtures } from "@/fixtures/debt-form";
@@ -38,8 +39,7 @@ export function Gallery() {
   return (
     <div className="flex flex-col gap-8 bg-neutral-soft p-6">
       <header className="flex flex-col gap-2">
-        <h1 className="text-title">{es.gallery.title}</h1>
-        <p className="text-body text-muted">{es.gallery.lead}</p>
+        <PageHeading title={es.gallery.title} lead={es.gallery.lead} />
         <div className="flex gap-2">
           {[360, 390, 430].map((w) => (
             <button key={w} type="button" onClick={() => setWidth(w)} className="rounded-small border border-line bg-surface px-3 py-1 text-small" aria-pressed={width === w}>

@@ -7,9 +7,10 @@ body {
   font-family: var(--font-sans);
 }
 
-h1 {
+@utility heading {
   font-family: var(--font-heading);
   font-weight: 400;
+  line-height: var(--leading-heading);
 }
 
 .meme-caption {
