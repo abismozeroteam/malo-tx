@@ -1,10 +1,9 @@
 import "server-only";
-import { createHash, timingSafeEqual } from "node:crypto";
+import { timingSafeEqual } from "node:crypto";
+import { sha256 } from "../tokens";
 
-export function isTeamSecret(candidate: string | null | undefined): boolean {
+export function isTeamSecret(candidate: unknown): boolean {
   const expected = process.env.TEAM_SECRET;
-  if (!expected || !candidate) return false;
-  const a = createHash("sha256").update(candidate).digest();
-  const b = createHash("sha256").update(expected).digest();
-  return timingSafeEqual(a, b);
+  if (!expected || typeof candidate !== "string" || !candidate) return false;
+  return timingSafeEqual(Buffer.from(sha256(candidate)), Buffer.from(sha256(expected)));
 }

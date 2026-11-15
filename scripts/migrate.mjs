@@ -1,6 +1,5 @@
-import { readdir, readFile } from "node:fs/promises";
-import path from "node:path";
 import { neon } from "@neondatabase/serverless";
+import { readMigrations } from "./migrations.mjs";
 
 const url = process.env.DATABASE_URL;
 if (!url) {
@@ -13,7 +12,6 @@ if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") {
 }
 
 const sql = neon(url);
-const dir = path.join(process.cwd(), "db", "migrations");
 
 const [, appliedRows] = await sql.transaction([
   sql.query(
@@ -23,19 +21,12 @@ const [, appliedRows] = await sql.transaction([
 ]);
 const applied = new Set(appliedRows.map((r) => r.name));
 
-const files = (await readdir(dir)).filter((f) => f.endsWith(".sql")).sort();
-for (const file of files) {
-  if (applied.has(file)) continue;
-  const body = await readFile(path.join(dir, file), "utf8");
-  // The HTTP driver runs one statement per query.
-  const statements = body
-    .split(/;\s*(?:\r?\n|$)/)
-    .map((s) => s.replace(/^\s*--.*$/gm, "").trim())
-    .filter(Boolean);
+for (const { name, statements } of await readMigrations()) {
+  if (applied.has(name)) continue;
   await sql.transaction([
     ...statements.map((s) => sql.query(s)),
-    sql.query("INSERT INTO schema_migrations (name) VALUES ($1)", [file]),
+    sql.query("INSERT INTO schema_migrations (name) VALUES ($1)", [name]),
   ]);
-  console.log(`[migrate] applied ${file}`);
+  console.log(`[migrate] applied ${name}`);
 }
 console.log("[migrate] up to date.");

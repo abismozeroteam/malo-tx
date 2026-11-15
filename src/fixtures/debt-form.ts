@@ -45,6 +45,7 @@ export const debtFormFixtures: Record<string, DebtFormData> = {
 };
 
 export const createdDebtFixture: CreatedDebt = {
+  ref: "fixture",
   name: filled.name,
   totalCents: filled.totalCents!,
   dueDate: filled.dueDate || null,

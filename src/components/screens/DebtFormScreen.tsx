@@ -71,7 +71,10 @@ export function DebtFormScreen({ data, actions }: { data: DebtFormData; actions:
     setFailure(null);
     const result = await actions.submit(values);
     setSubmitting(false);
-    if (result.ok) return setCreated(result.debt);
+    if (result.ok) {
+      window.history.replaceState(null, "", routes.debt(result.debt.ref));
+      return setCreated(result.debt);
+    }
     if ("error" in result) return setFailure(result.error);
     setErrors(result.errors);
     setStep(firstStepWithErrors(result.errors));

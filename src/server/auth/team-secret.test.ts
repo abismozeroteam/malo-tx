@@ -22,5 +22,6 @@ describe("isTeamSecret", () => {
     expect(isTeamSecret("")).toBe(false);
     expect(isTeamSecret("anything")).toBe(false);
     expect(isTeamSecret(null)).toBe(false);
+    expect(isTeamSecret(42)).toBe(false);
   });
 });

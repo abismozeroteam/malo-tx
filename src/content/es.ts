@@ -2,12 +2,16 @@ import type { ActionError, CatalogMemeKey } from "@/contracts/common";
 import type { DebtFormError } from "@/contracts/debt-form";
 import type { DebtSummaryStatus, DashboardFilter } from "@/contracts/dashboard";
 import type { SignInCodeError } from "@/contracts/sign-in";
+import type { TeamGateError } from "@/contracts/team-gate";
+import { LIMITS } from "@/contracts/debt-form-rules";
+import { COUNTRY_CODE } from "@/contracts/phone";
 
 const common = {
   currency: "MXN",
-  countryCode: "+52",
+  countryCode: `+${COUNTRY_CODE}`,
   phonePlaceholder: "55 1234 5678",
   invalidPhone: "El número debe tener 10 dígitos.",
+  rateLimited: "Vas muy rápido. Espera un minuto e intenta otra vez.",
 };
 
 export const es = {
@@ -75,6 +79,20 @@ export const es = {
     attemptsLeft: (n: number) => (n === 1 ? "Te queda 1 intento." : `Te quedan ${n} intentos.`),
     done: "Listo, ya estás dentro.",
     doneHint: "Te llevamos a tus cobros.",
+  },
+
+  teamGate: {
+    title: "Entrada del equipo",
+    lead: "Mientras llega el inicio de sesión por WhatsApp, entra con la clave del equipo.",
+    secretLabel: "Clave del equipo",
+    nameLabel: "Tu nombre",
+    nameHint: "Así te verán quienes te deben.",
+    submit: "Entrar",
+    error: {
+      wrong_secret: "Esa clave no es.",
+      invalid_name: `Escribe tu nombre, hasta ${LIMITS.firstName} letras.`,
+      rate_limited: common.rateLimited,
+    } satisfies Record<TeamGateError, string>,
   },
 
   dashboard: {
@@ -252,7 +270,7 @@ export const es = {
 
   actionErrors: {
     network: "Algo falló de nuestro lado. Intenta otra vez.",
-    rate_limited: "Vas muy rápido. Espera un minuto e intenta otra vez.",
+    rate_limited: common.rateLimited,
     invalid_phone: common.invalidPhone,
     push_failed: "No pudimos mandar el cobro a tu banco. Revisa el número o paga con el QR.",
     already_answered: "Ya respondiste a este cobro.",

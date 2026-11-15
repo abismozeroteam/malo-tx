@@ -23,6 +23,7 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.16",
     "@secretlint/secretlint-rule-preset-recommend": "13.1.0",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "26.6.6",
