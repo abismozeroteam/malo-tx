@@ -4,7 +4,7 @@ import { DebtFormScreen } from "@/components/screens/DebtFormScreen";
 import { createDebtAction } from "@/server/actions/create-debt";
 import { requireUser } from "@/server/auth/current-user";
 
-export const metadata = { title: `${es.debtForm.title.what} · ${es.brand.name}` };
+export const metadata = { title: es.debtForm.title.what };
 
 export default async function NewDebtPage() {
   const user = await requireUser();

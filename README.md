@@ -76,8 +76,10 @@ Ver `.env.example`. Ningún valor real va en el repositorio.
 | `DEMO_MODE` | Cobra $0.01 por pago salvo que valga `false` |
 | `TEAM_SECRET` | Clave del equipo para entrar en `/entrar` mientras no hay inicio de sesión por WhatsApp |
 
-Los enlaces de cobro usan el dominio de producción que Vercel pone en
-`VERCEL_PROJECT_PRODUCTION_URL`; en local usan `http://localhost:3000`.
+Producción vive en https://malotx.app. Los enlaces de cobro, el canonical y el
+sitemap usan el dominio de producción que Vercel pone en
+`VERCEL_PROJECT_PRODUCTION_URL` (también en previews); en local usan
+`http://localhost:3000`.
 
 ## Seguridad
 
@@ -88,7 +90,8 @@ Los enlaces de cobro usan el dominio de producción que Vercel pone en
 - Las sesiones guardan solo el hash del token. Entrar y crear cobros tienen
   límite por IP, y crear cobros también por usuario.
 - La página que abre quien debe solo muestra su nombre de pila; nunca
-  teléfonos ni cuentas bancarias. No aparece en buscadores (`noindex`).
+  teléfonos ni cuentas bancarias. Las páginas privadas (enlaces de cobro,
+  `/cobros`, `/entrar`) no aparecen en buscadores.
 - El QR lo pide el navegador ya abierta la página, así que las vistas previas
   de los enlaces nunca generan cobros. Un enlace pagado o cancelado no recibe
   QR ni solicitudes.

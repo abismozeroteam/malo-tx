@@ -9,6 +9,7 @@ import { formatDayMonth, formatMoney } from "@/content/format";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { MemeCard } from "@/components/ui/MemeCard";
+import { Icon } from "@/components/ui/Icon";
 import { PageHeading } from "@/components/ui/PageHeading";
 import { Tag, type Tone } from "@/components/ui/Notice";
 import { Screen } from "@/components/ui/Screen";
@@ -125,7 +126,7 @@ function Greeting({ name, startEditing, rename }: { name: string; startEditing: 
             onChange={(e) => setValue(e.target.value)}
             maxLength={30}
             autoFocus
-            className="heading min-w-0 flex-1 rounded-control border border-line bg-surface px-3 py-2 text-title"
+            className="heading min-w-0 flex-1 rounded-control border border-line bg-surface px-3 py-2 text-heading-md"
           />
           <Button size="sm" type="submit" className="w-auto px-4">
             {t.saveName}
@@ -134,8 +135,8 @@ function Greeting({ name, startEditing, rename }: { name: string; startEditing: 
       ) : (
         <div className="flex items-start gap-2">
           <PageHeading title={t.greeting(current)} lead={t.subtitle} />
-          <button type="button" onClick={() => setEditing(true)} aria-label={t.editName} className="text-lead text-muted">
-            ✎
+          <button type="button" onClick={() => setEditing(true)} aria-label={t.editName} className="mt-2 p-1 text-muted">
+            <Icon name="edit" />
           </button>
         </div>
       )}

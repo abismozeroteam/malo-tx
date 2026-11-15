@@ -45,7 +45,7 @@ export async function answer(db: Database, debtorId: string, status: DebtorAnswe
 
 export async function qrImage(db: Database, token: string): Promise<Buffer | null> {
   const [row] = await db.query<{ qr_image: string }>(
-    "SELECT qr_image FROM debtors WHERE token = $1 AND qr_expires_at > now() AND status <> 'paid'",
+    "SELECT qr_image FROM debtors WHERE token = $1 AND qr_expires_at > now() AND status IN ('pending', 'claims_paid', 'disputed')",
     [token],
   );
   return row ? Buffer.from(row.qr_image, "base64") : null;

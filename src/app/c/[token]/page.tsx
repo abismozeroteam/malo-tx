@@ -7,8 +7,7 @@ import { isDemoMode } from "@/server/env";
 
 export async function generateMetadata({ params }: PageProps<"/c/[token]">): Promise<Metadata> {
   const row = await loadDebtor((await params).token);
-  const title = row ? es.debtor.owesTo(row.first_name, row.creditor_name) : es.brand.name;
-  return { title, robots: { index: false, follow: false }, openGraph: { title, description: es.brand.tagline } };
+  return row ? { title: es.debtor.owesTo(row.first_name, row.creditor_name) } : {};
 }
 
 export default async function DebtorPage({ params }: PageProps<"/c/[token]">) {

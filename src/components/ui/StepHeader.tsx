@@ -1,12 +1,13 @@
 import { es } from "@/content/es";
 import { cx } from "./cx";
+import { Icon } from "./Icon";
 
 export function StepHeader({ title, step, onBack, onCancel }: { title: string; step: 1 | 2 | 3; onBack?: () => void; onCancel?: () => void }) {
   return (
     <header className="flex w-full flex-col gap-4">
       <div className="flex items-center gap-4">
-        <button type="button" onClick={onBack} aria-label={es.debtForm.back} className="text-subtitle leading-none text-ink">
-          ←
+        <button type="button" onClick={onBack} aria-label={es.debtForm.back} className="-ml-1 p-1 text-ink">
+          <Icon name="back" className="size-6" />
         </button>
         <p className="flex-1 text-lead font-semibold text-ink">{title}</p>
         {onCancel && (

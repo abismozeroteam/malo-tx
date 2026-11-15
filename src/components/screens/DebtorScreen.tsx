@@ -254,7 +254,7 @@ function PaidView({ data }: { data: PaidData }) {
     <Screen>
       <Wordmark className="self-center" />
       <MemeCard meme={debtorPageMeme(data)} />
-      <PageHeading size="hero" title={t.paid.heading} lead={t.paid.lead(data.debtorName, data.creditorName)} />
+      <PageHeading size="lg" title={t.paid.heading} lead={t.paid.lead(data.debtorName, data.creditorName)} />
       <Card tone="outlined">
         <p className="flex items-center justify-between gap-3">
           <span className="text-button font-semibold">{data.debtName}</span>
