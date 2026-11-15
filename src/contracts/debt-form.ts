@@ -55,6 +55,7 @@ export type CreatedLink = {
 };
 
 export type CreatedDebt = {
+  ref: string;
   name: string;
   totalCents: Cents;
   dueDate: IsoDate | null;

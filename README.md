@@ -70,13 +70,15 @@ Ver `.env.example`. Ningún valor real va en el repositorio.
 | `PEY_API_KEY` | Llave de la API de pey |
 | `PEY_WEBHOOK_SECRET` | Secreto para verificar los webhooks de pey |
 | `DEMO_MODE` | Cobra $0.01 por pago salvo que valga `false` |
-| `TEAM_SECRET` | Protege las rutas internas mientras no hay inicio de sesión |
+| `TEAM_SECRET` | Clave del equipo para entrar en `/entrar` mientras no hay inicio de sesión por WhatsApp |
 
 ## Seguridad
 
 - Un cobro solo se marca pagado con un webhook de pey con firma válida o con la
   consulta de la transacción a pey, nunca por algo que mande el navegador.
 - Cada webhook se procesa una sola vez.
+- Cada persona recibe un enlace propio con un token aleatorio de 128 bits.
+- Las sesiones guardan solo el hash del token; crear cobros tiene límite por usuario y por IP.
 - Las páginas de cobro solo muestran el nombre de pila; nunca teléfonos ni
   cuentas bancarias.
 - Cada commit y el historial completo pasan por un escáner de secretos.
