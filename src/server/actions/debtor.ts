@@ -5,7 +5,7 @@ import type { ActionResult } from "@/contracts/common";
 import type { DebtorAnswer, QrResult } from "@/contracts/debtor-page";
 import { db } from "../db";
 import { findOpenDebtor } from "../debtors/debtor-page";
-import { answer, ensureQr, markPaidFromQr, paymentStatus, peyCharges, sendPush } from "../debtors/payments";
+import { answer, ensureQr, markPaidFromPey, paymentStatus, peyCharges, sendPush } from "../debtors/payments";
 import { isDemoMode } from "../env";
 import { logFailure } from "../log";
 import { consume, ipKey, limit, RATE_LIMITS } from "../rate-limit";
@@ -36,7 +36,7 @@ export async function sendPushAction(token: unknown, phoneInput: unknown): Promi
   ];
   if (!(await consume(db(), limits))) return { ok: false, error: "rate_limited" };
   try {
-    await sendPush(peyCharges, row, phone.data, isDemoMode());
+    await sendPush(db(), peyCharges, row, phone.data, isDemoMode());
     return { ok: true };
   } catch (error) {
     logFailure("push", error);
@@ -71,10 +71,10 @@ export async function checkPaidAction(token: unknown, askPey: unknown): Promise<
   const row = await paymentStatus(db(), token);
   if (!row || row.status === "cancelled") return false;
   if (row.status === "paid") return true;
-  if (askPey !== true || !row.qr_id) return false;
+  if (askPey !== true || (!row.qr_id && !row.push_transaction_id)) return false;
   if (!(await consume(db(), [limit(`pey-check:${row.id}`, RATE_LIMITS.peyChecksPerLink)]))) return false;
   try {
-    return await markPaidFromQr(db(), peyCharges, row.id, row.qr_id, isDemoMode());
+    return await markPaidFromPey(db(), peyCharges, row, isDemoMode());
   } catch (error) {
     logFailure("pey-check", error);
     return false;

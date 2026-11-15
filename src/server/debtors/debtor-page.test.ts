@@ -4,7 +4,7 @@ import { seedDebt } from "../../../test/debts";
 import type { Database } from "../db";
 import type { Phone } from "../validation/phone";
 import { findDebtor, findOpenDebtor, toDebtorPage } from "./debtor-page";
-import { answer, ensureQr, markPaidFromQr, qrImage, sendPush, type PeyCharges } from "./payments";
+import { answer, ensureQr, markPaidFromPey, paymentStatus, qrImage, sendPush, type PeyCharges } from "./payments";
 
 const now = new Date("2026-11-15T15:00:00Z");
 
@@ -13,6 +13,7 @@ function fakePey() {
     createQr: vi.fn(async () => ({ id: "qr_1", qrString: "codi", qrImage: "iVBORw0KGgo=" })),
     createPush: vi.fn(async () => ({ transactionId: "tx_1", codiId: "c1" })),
     qrTransactions: vi.fn(async () => ({ items: [] as Awaited<ReturnType<PeyCharges["qrTransactions"]>>["items"], nextToken: null })),
+    transaction: vi.fn(async (): ReturnType<PeyCharges["transaction"]> => ({ id: "tx_1", status: "PENDING", amount: 0.01 })),
   } satisfies PeyCharges;
 }
 
@@ -65,11 +66,12 @@ describe("debtor page", () => {
     expect(pey.createQr).toHaveBeenCalledWith(expect.objectContaining({ amountCents: 15_000 }));
   });
 
-  it("sends a push without storing the phone", async () => {
+  it("sends a push, keeps its transaction id and never stores the phone", async () => {
     const pey = fakePey();
-    await sendPush(pey, (await findOpenDebtor(db, token))!, "5512345678" as Phone, true);
+    await sendPush(db, pey, (await findOpenDebtor(db, token))!, "5512345678" as Phone, true);
     expect(pey.createPush).toHaveBeenCalledWith(expect.objectContaining({ phoneNumber: "5512345678", amountCents: 1 }));
     expect(await db.query("SELECT 1 FROM debtors WHERE phone = '5512345678'")).toEqual([]);
+    expect(await paymentStatus(db, token)).toMatchObject({ push_transaction_id: "tx_1" });
   });
 
   it("serves the QR image only while it is valid", async () => {
@@ -93,19 +95,22 @@ describe("debtor page", () => {
   });
 });
 
-describe("markPaidFromQr", () => {
-  it("marks paid only when pey reports a paid transaction for the QR", async () => {
+describe("markPaidFromPey", () => {
+  it("marks paid when pey reports the QR or the push as paid", async () => {
     const db = await createTestDb();
-    const token = (await seedDebt(db)).tokens[0];
-    const { id } = (await findOpenDebtor(db, token))!;
+    const [qrToken, pushToken] = (await seedDebt(db)).tokens;
     const pey = fakePey();
+    await db.query("UPDATE debtors SET qr_id = 'qr_1' WHERE token = $1", [qrToken]);
+    await sendPush(db, pey, (await findOpenDebtor(db, pushToken))!, "5512345678" as Phone, true);
 
-    pey.qrTransactions.mockResolvedValueOnce({ items: [{ id: "t", status: "PENDING", amount: 0.01 }], nextToken: null });
-    expect(await markPaidFromQr(db, pey, id, "qr_1", true)).toBe(false);
+    expect(await markPaidFromPey(db, pey, (await paymentStatus(db, qrToken))!, true)).toBe(false);
 
     pey.qrTransactions.mockResolvedValueOnce({ items: [{ id: "t", status: "PAID", amount: 0.01, datePaid: 1794760000 }], nextToken: null });
-    expect(await markPaidFromQr(db, pey, id, "qr_1", true)).toBe(true);
-    expect(pey.qrTransactions).toHaveBeenCalledWith("qr_1");
-    expect(toDebtorPage(await findDebtor(db, token), true)).toMatchObject({ state: "paid", paidAt: "2026-11-15T16:26:40.000Z" });
+    expect(await markPaidFromPey(db, pey, (await paymentStatus(db, qrToken))!, true)).toBe(true);
+    expect(toDebtorPage(await findDebtor(db, qrToken), true)).toMatchObject({ state: "paid", paidAt: "2026-11-15T16:26:40.000Z" });
+
+    pey.transaction.mockResolvedValueOnce({ id: "tx_1", status: "PAID", amount: 0.01 });
+    expect(await markPaidFromPey(db, pey, (await paymentStatus(db, pushToken))!, true)).toBe(true);
+    expect(pey.transaction).toHaveBeenCalledWith("tx_1");
   });
 });
