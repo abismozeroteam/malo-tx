@@ -33,7 +33,7 @@ $0.01 MXN.
 
 ## Desarrollo local
 
-Requisitos: Node.js 22 y npm.
+Requisitos: Node.js 26 y npm.
 
 ```bash
 npm install
