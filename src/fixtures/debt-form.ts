@@ -1,4 +1,4 @@
-import { EMPTY_DEBT_FORM, type CreatedDebt, type DebtFormData, type DebtFormValues } from "@/contracts/debt-form";
+import { EMPTY_DEBT_FORM, toMemeView, type CreatedDebt, type DebtFormData, type DebtFormValues } from "@/contracts/debt-form";
 import { es } from "@/content/es";
 import { sampleQrImage } from "./qr";
 
@@ -46,11 +46,10 @@ export const debtFormFixtures: Record<string, DebtFormData> = {
 };
 
 export const createdDebtFixture: CreatedDebt = {
-  name: "Cena del viernes",
-  totalCents: 180000,
-  dueDate: "2026-11-20",
-  meme: { kind: "catalog", key: "a" },
-  caption: es.memes.defaultCaption.a,
+  name: filled.name,
+  totalCents: filled.totalCents!,
+  dueDate: filled.dueDate || null,
+  meme: toMemeView(filled.meme!, filled.caption),
   links: [
     { firstName: "Ana", amountCents: 45000, url: "https://malo-tx.vercel.app/c/ejemplo-ana", whatsappUrl: "https://wa.me/525523456789" },
     { firstName: "Pedro", amountCents: 45000, url: "https://malo-tx.vercel.app/c/ejemplo-pedro", whatsappUrl: "https://wa.me/" },

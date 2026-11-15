@@ -2,39 +2,38 @@
 
 import { useState } from "react";
 import type { CreatedDebt } from "@/contracts/debt-form";
+import { routes } from "@/contracts/routes";
 import { es } from "@/content/es";
 import { formatDate, formatMoney } from "@/content/format";
 import { Button, LinkButton } from "@/components/ui/Button";
-import { MemeCard } from "@/components/ui/MemeCard";
+import { PageHeading } from "@/components/ui/PageHeading";
 import { Screen } from "@/components/ui/Screen";
+import { DebtPreview } from "./DebtFormScreen";
 
 const t = es.created;
 
 export function CreatedScreen({ debt, creditorName }: { debt: CreatedDebt; creditorName: string }) {
-  const meme =
-    debt.meme.kind === "catalog"
-      ? { kind: "catalog" as const, key: debt.meme.key, caption: debt.caption }
-      : { kind: "upload" as const, src: debt.meme.src, caption: debt.caption };
+  const split = debt.links.length > 1;
+  const details = [split && t.partOf(formatMoney(debt.totalCents)), debt.dueDate && t.due(formatDate(debt.dueDate))].filter(Boolean).join(" · ");
   return (
     <Screen>
       <p className="text-lead font-semibold">{t.title}</p>
-      <div className="flex flex-col gap-1">
-        <h1 className="text-title font-bold leading-heading">{t.heading}</h1>
-        <p className="text-body text-muted">{t.lead}</p>
-      </div>
+      <PageHeading title={t.heading} lead={t.lead} />
       <ul className="flex flex-col gap-4">
         {debt.links.map((link) => (
-          <li key={link.url} className="flex flex-col gap-3 rounded-hero border border-line bg-surface p-3 leading-ui">
+          <li key={link.url} className="flex flex-col gap-3">
             <p className="text-small font-semibold text-brand-ink">{t.to(link.firstName)}</p>
-            <MemeCard meme={meme} size="banner" />
-            <p className="text-lead font-semibold">{debt.name}</p>
-            <p className="text-body text-muted">{t.youOwe(creditorName)}</p>
-            <p className="text-amount font-semibold">{formatMoney(link.amountCents)}</p>
-            <p className="text-small text-muted">
-              {debt.links.length > 1 && t.partOf(formatMoney(debt.totalCents))}
-              {debt.links.length > 1 && debt.dueDate && " · "}
-              {debt.dueDate && t.due(formatDate(debt.dueDate))}
-            </p>
+            <DebtPreview
+              meme={debt.meme}
+              name={debt.name}
+              rows={
+                <>
+                  <p className="text-body text-muted">{t.youOwe(creditorName)}</p>
+                  <p className="text-amount font-semibold">{formatMoney(link.amountCents)}</p>
+                  {details && <p className="text-small text-muted">{details}</p>}
+                </>
+              }
+            />
             <LinkButton href={link.whatsappUrl} external>
               {t.share}
             </LinkButton>
@@ -42,9 +41,9 @@ export function CreatedScreen({ debt, creditorName }: { debt: CreatedDebt; credi
           </li>
         ))}
       </ul>
-      <a href="/cobros" className="text-center text-body font-semibold text-brand-ink">
+      <LinkButton href={routes.debts} variant="link" className="text-center text-body">
         {t.toDashboard}
-      </a>
+      </LinkButton>
     </Screen>
   );
 }

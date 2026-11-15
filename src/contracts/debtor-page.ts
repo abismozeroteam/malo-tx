@@ -1,4 +1,4 @@
-import type { ActionResult, Cents, IsoDate, IsoDateTime, MemeView } from "./common";
+import type { ActionError, ActionResult, Cents, IsoDate, IsoDateTime, MemeView } from "./common";
 
 export type DebtorStatus = "pending" | "claims_paid" | "disputed" | "paid" | "cancelled";
 
@@ -28,6 +28,7 @@ export type DebtorPageData =
   | (DebtorPageBase & { state: "paid"; paidAt: IsoDateTime });
 
 export type DebtorPageActions = {
+  requestQr(): Promise<{ ok: true; qr: CodiQr } | { ok: false; error: ActionError }>;
   sendPush(phone: string): Promise<ActionResult>;
   claimPaid(): Promise<ActionResult>;
   dispute(): Promise<ActionResult>;

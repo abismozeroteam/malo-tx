@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { DashboardActions, DashboardData, DashboardFilter, DebtCard as DebtCardData } from "@/contracts/dashboard";
+import { routes } from "@/contracts/routes";
 import { es } from "@/content/es";
 import { formatDayMonth, formatMoney } from "@/content/format";
 import { BottomNav } from "@/components/ui/BottomNav";
@@ -29,13 +30,13 @@ export function DashboardScreen({ data, actions }: { data: DashboardData; action
           <p className="text-caption font-semibold text-on-brand-muted">{t.owed}</p>
           <p className="flex items-baseline justify-between">
             <span className="text-amount font-semibold">{formatMoney(data.owedCents)}</span>
-            <span className="text-small text-on-brand-muted">{t.currency}</span>
+            <span className="text-small text-on-brand-muted">{es.common.currency}</span>
           </p>
           <p className="text-small text-on-brand-muted">
             {t.received} · <span className="font-semibold text-on-brand">{formatMoney(data.receivedCents)}</span>
           </p>
         </section>
-        <LinkButton href="/cobros/nuevo">{t.create}</LinkButton>
+        <LinkButton href={routes.newDebt}>{t.create}</LinkButton>
 
         {data.debts.length === 0 ? (
           <section className="flex flex-col items-center gap-3 py-6 text-center">

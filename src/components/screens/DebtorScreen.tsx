@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ActionError, ActionResult } from "@/contracts/common";
 import type { CodiQr, DebtorPageActions, DebtorPageData } from "@/contracts/debtor-page";
+import { routes } from "@/contracts/routes";
 import { es } from "@/content/es";
 import { formatDate, formatDateTime, formatMoney } from "@/content/format";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { MemeCard } from "@/components/ui/MemeCard";
 import { Notice, Tag } from "@/components/ui/Notice";
+import { PageHeading } from "@/components/ui/PageHeading";
 import { Screen } from "@/components/ui/Screen";
 import { TextField } from "@/components/ui/TextField";
+import { ValueRow } from "@/components/ui/ValueRow";
 import { Wordmark } from "@/components/ui/Wordmark";
 
 const t = es.debtor;
@@ -40,6 +43,7 @@ function OpenView({ data, actions }: { data: OpenData; actions: DebtorPageAction
   const [answered, setAnswered] = useState(!data.canAnswer);
   const [reported, setReported] = useState(false);
   const [error, setError] = useState<ActionError | null>(null);
+  const qr = useFreshQr(data.qr, actions.requestQr);
 
   const meme = reported ? { kind: "catalog" as const, key: "a" as const, caption: data.meme.caption } : data.meme;
   const amount = formatMoney(data.amountCents);
@@ -79,15 +83,11 @@ function OpenView({ data, actions }: { data: OpenData; actions: DebtorPageAction
         </>
       )}
       {data.status === "claims_paid" && (
-        <>
-          <h1 className="text-title font-bold leading-heading">{t.claimsPaid.heading(data.debtorName, data.creditorName)}</h1>
-          <p className="text-body leading-ui text-muted">{t.claimsPaid.meta(data.debtName, amount)}</p>
-        </>
+        <PageHeading title={t.claimsPaid.heading(data.debtorName, data.creditorName)} lead={t.claimsPaid.meta(data.debtName, amount)} />
       )}
       {data.status === "disputed" && (
         <>
-          <h1 className="text-title font-bold leading-heading">{t.disputed.heading(data.debtorName)}</h1>
-          <p className="text-body leading-ui text-muted">{t.disputed.meta(data.debtName, amount, data.creditorName)}</p>
+          <PageHeading title={t.disputed.heading(data.debtorName)} lead={t.disputed.meta(data.debtName, amount, data.creditorName)} />
           {!showPay && (
             <>
               <Button onClick={() => setShowPay(true)}>{t.disputed.payAnyway}</Button>
@@ -100,7 +100,7 @@ function OpenView({ data, actions }: { data: OpenData; actions: DebtorPageAction
       {showPay && (
         <>
           <PayCard
-            qr={data.qr}
+            qr={qr}
             title={data.status === "claims_paid" ? t.claimsPaid.stillPay : t.payWithCodi}
             hint={data.status === "claims_paid" ? t.claimsPaid.qrHint : t.scanHint}
           />
@@ -109,7 +109,7 @@ function OpenView({ data, actions }: { data: OpenData; actions: DebtorPageAction
         </>
       )}
 
-      {error && <Notice tone="danger">{t.errors[error]}</Notice>}
+      {error && <Notice tone="danger">{es.actionErrors[error]}</Notice>}
 
       {data.status === "pending" && !answered && (
         <AnswerButtons
@@ -136,7 +136,7 @@ function OwedCard({ data }: { data: OpenData }) {
       <p className="text-caption font-semibold text-brand-ink">{t.whatYouOwe}</p>
       <p className="flex items-center justify-between">
         <span className="text-amount font-semibold text-ink">{formatMoney(data.amountCents)}</span>
-        <span className="text-small text-muted">{t.currency}</span>
+        <span className="text-small text-muted">{es.common.currency}</span>
       </p>
       {data.totalCents !== null && <p className="text-small text-brand-ink">{t.partOf(formatMoney(data.totalCents), data.debtName)}</p>}
     </section>
@@ -167,7 +167,7 @@ function AnswerButtons({ onClaimPaid, onDispute }: { onClaimPaid: () => void; on
   const [confirming, setConfirming] = useState<"paid" | "dispute" | null>(null);
   if (confirming) {
     return (
-      <Card className="flex flex-col gap-3 border border-line">
+      <Card tone="outlined">
         <p className="text-body leading-ui text-ink">{confirming === "paid" ? t.confirmAlreadyPaid : t.confirmNotMine}</p>
         <div className="flex gap-3">
           <Button size="md" onClick={() => (confirming === "paid" ? onClaimPaid() : onDispute())}>
@@ -222,19 +222,18 @@ function PushView({
     <Screen>
       <Header demoMode={data.demoMode} />
       <MemeCard meme={meme} />
-      <h1 className="text-title font-bold leading-heading">{t.push.heading}</h1>
-      <p className="text-body leading-ui text-muted">{t.push.lead(formatMoney(data.amountCents))}</p>
+      <PageHeading title={t.push.heading} lead={t.push.lead(formatMoney(data.amountCents))} />
       <form onSubmit={submit} className="flex w-full flex-col gap-4">
         <TextField
           name="phone"
           label={t.push.label}
-          placeholder={t.push.placeholder}
+          placeholder={es.common.phonePlaceholder}
           inputMode="numeric"
           autoComplete="tel-national"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           hint={t.push.privacy}
-          error={error ? t.errors[error] : null}
+          error={error ? es.actionErrors[error] : null}
         />
         {sent && <Notice tone="success">{t.push.sent}</Notice>}
         <Button type="submit" disabled={sending || phone.trim() === ""}>
@@ -254,26 +253,17 @@ function PaidView({ data }: { data: PaidData }) {
     <Screen>
       <Wordmark className="self-center" />
       <MemeCard meme={data.meme} />
-      <h1 className="text-hero font-bold leading-heading">{t.paid.heading}</h1>
-      <p className="text-lead leading-ui text-muted">{t.paid.lead(data.debtorName, data.creditorName)}</p>
-      <Card className="flex flex-col gap-3 border border-line leading-ui">
+      <PageHeading size="hero" title={t.paid.heading} lead={t.paid.lead(data.debtorName, data.creditorName)} />
+      <Card tone="outlined">
         <p className="flex items-center justify-between gap-3">
           <span className="text-button font-semibold">{data.debtName}</span>
           <Tag tone="success">{t.paid.tag}</Tag>
         </p>
-        <p className="flex justify-between text-body">
-          <span className="text-muted">{t.paid.yourPart}</span>
-          <span className="text-button font-semibold">
-            {formatMoney(data.amountCents)} {t.currency}
-          </span>
-        </p>
-        <p className="flex justify-between text-body">
-          <span className="text-muted">{t.paid.paidAt}</span>
-          <span>{formatDateTime(data.paidAt)}</span>
-        </p>
+        <ValueRow label={t.paid.yourPart} value={`${formatMoney(data.amountCents)} ${es.common.currency}`} />
+        <ValueRow label={t.paid.paidAt} value={formatDateTime(data.paidAt)} />
       </Card>
       {data.demoMode && <Notice>{es.demo.paidBanner}</Notice>}
-      <LinkButton href="/">{t.ctaOwn}</LinkButton>
+      <LinkButton href={routes.home}>{t.ctaOwn}</LinkButton>
     </Screen>
   );
 }
@@ -283,9 +273,21 @@ function GoneView() {
     <Screen>
       <Wordmark className="self-center" />
       <MemeCard meme={{ kind: "catalog", key: "c", caption: t.gone.caption }} />
-      <h1 className="text-title font-bold leading-heading">{t.gone.heading}</h1>
-      <p className="text-body leading-ui text-muted">{t.gone.lead}</p>
-      <LinkButton href="/">{t.ctaOwn}</LinkButton>
+      <PageHeading title={t.gone.heading} lead={t.gone.lead} />
+      <LinkButton href={routes.home}>{t.ctaOwn}</LinkButton>
     </Screen>
   );
+}
+
+function useFreshQr(initial: CodiQr | null, requestQr: DebtorPageActions["requestQr"]) {
+  const [qr, setQr] = useState(initial);
+  useEffect(() => {
+    const wait = qr ? new Date(qr.expiresAt).getTime() - Date.now() : 0;
+    const timer = setTimeout(async () => {
+      const result = await requestQr();
+      if (result.ok) setQr(result.qr);
+    }, Math.max(wait, 0));
+    return () => clearTimeout(timer);
+  }, [qr, requestQr]);
+  return qr;
 }

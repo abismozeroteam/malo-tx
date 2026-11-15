@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { toTenDigitPhone } from "@/contracts/phone";
 import type { SignInActions, SignInData } from "@/contracts/sign-in";
 import { es } from "@/content/es";
 import { Button, LinkButton } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { Notice } from "@/components/ui/Notice";
+import { PageHeading } from "@/components/ui/PageHeading";
 import { Screen } from "@/components/ui/Screen";
 import { TextField } from "@/components/ui/TextField";
 import { Wordmark } from "@/components/ui/Wordmark";
@@ -48,7 +51,7 @@ function PhoneStep({
     const result = await start(phone);
     if (!result.ok) return setFailed(true);
     window.open(result.whatsappUrl, "_blank", "noopener,noreferrer");
-    onStarted(result.whatsappUrl, phone.replace(/\D/g, "").slice(-4));
+    onStarted(result.whatsappUrl, toTenDigitPhone(phone)?.slice(-4) ?? "");
   }
 
   return (
@@ -62,14 +65,14 @@ function PhoneStep({
         <TextField
           name="phone"
           label={t.phoneLabel}
-          prefix={t.countryCode}
-          placeholder={t.phonePlaceholder}
+          prefix={es.common.countryCode}
+          placeholder={es.common.phonePlaceholder}
           inputMode="numeric"
           autoComplete="tel-national"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           hint={t.startHint}
-          error={failed ? t.invalidPhone : null}
+          error={failed ? es.common.invalidPhone : null}
         />
         <Button type="submit">{t.start}</Button>
       </form>
@@ -104,14 +107,13 @@ function CodeStep({
   return (
     <Screen>
       <Wordmark className="self-center" />
-      <h1 className="text-title font-bold leading-heading">{t.codeTitle}</h1>
-      <p className="text-body leading-ui text-muted">{t.codeLead(data.phoneLast4)}</p>
+      <PageHeading title={t.codeTitle} lead={t.codeLead(data.phoneLast4)} />
       <LinkButton href={data.whatsappUrl} variant="secondary" external>
         {t.openWhatsapp}
       </LinkButton>
-      <button type="button" onClick={onChangeNumber} className="self-start text-small font-semibold text-brand-ink">
+      <Button variant="link" onClick={onChangeNumber} className="self-start">
         {t.changeNumber}
-      </button>
+      </Button>
       <form onSubmit={submit} className="flex w-full flex-col gap-4">
         <TextField
           name="code"
@@ -132,13 +134,13 @@ function CodeStep({
           {t.verify}
         </Button>
       </form>
-      <a href={data.whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-center text-small font-semibold text-brand-ink">
+      <LinkButton href={data.whatsappUrl} variant="link" external className="text-center">
         {t.resend}
-      </a>
-      <section className="mt-auto rounded-card bg-neutral-soft p-4 leading-ui">
+      </LinkButton>
+      <Card tone="neutral" className="mt-auto gap-1">
         <p className="text-body font-semibold">{t.noPasswords}</p>
         <p className="text-small text-muted">{t.noPasswordsHint}</p>
-      </section>
+      </Card>
     </Screen>
   );
 }

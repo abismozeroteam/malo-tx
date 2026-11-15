@@ -1,10 +1,11 @@
+import { routes } from "@/contracts/routes";
 import { es } from "@/content/es";
 import { cx } from "./cx";
 
 export function BottomNav({ active }: { active: "debts" | "profile" }) {
   const items = [
-    { key: "debts", label: es.dashboard.nav.debts, href: "/cobros" },
-    { key: "profile", label: es.dashboard.nav.profile, href: "/perfil" },
+    { key: "debts", label: es.dashboard.nav.debts, href: routes.debts },
+    { key: "profile", label: es.dashboard.nav.profile, href: routes.profile },
   ] as const;
   return (
     <nav className="sticky bottom-0 mt-auto flex w-full border-t border-line bg-surface">

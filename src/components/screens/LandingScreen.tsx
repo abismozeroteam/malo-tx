@@ -1,3 +1,4 @@
+import { routes } from "@/contracts/routes";
 import { es } from "@/content/es";
 import { LinkButton } from "@/components/ui/Button";
 import { MemeCard } from "@/components/ui/MemeCard";
@@ -18,7 +19,7 @@ export function LandingScreen() {
           <li key={point}>· {point}</li>
         ))}
       </ul>
-      <LinkButton href="/entrar">{t.cta}</LinkButton>
+      <LinkButton href={routes.signIn}>{t.cta}</LinkButton>
     </Screen>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import type { ActionResult } from "@/contracts/common";
 import { es } from "@/content/es";
 import { CreatedScreen } from "@/components/screens/CreatedScreen";
 import { DashboardScreen } from "@/components/screens/DashboardScreen";
@@ -9,42 +8,29 @@ import { DebtFormScreen } from "@/components/screens/DebtFormScreen";
 import { DebtorScreen } from "@/components/screens/DebtorScreen";
 import { LandingScreen } from "@/components/screens/LandingScreen";
 import { SignInScreen } from "@/components/screens/SignInScreen";
+import { dashboardActionsFixture, debtFormActionsFixture, debtorActionsFixture, signInActionsFixture } from "@/fixtures/actions";
 import { dashboardFixtures } from "@/fixtures/dashboard";
 import { createdDebtFixture, debtFormFixtures } from "@/fixtures/debt-form";
 import { debtorPageFixtures } from "@/fixtures/debtor-page";
 import { signInFixtures } from "@/fixtures/sign-in";
 
-const ok = async (): Promise<ActionResult> => ({ ok: true });
+const titles = es.gallery.sections;
 
-const debtorActions = { sendPush: ok, claimPaid: ok, dispute: ok, report: ok };
-const dashboardActions = { rename: ok };
-const signInActions = {
-  start: async () => ({ ok: true as const, whatsappUrl: "#" }),
-  verify: async () => ({ ok: false as const, error: "wrong_code" as const, attemptsLeft: 3 }),
-};
-const debtFormActions = { submit: async () => ({ ok: true as const, debt: createdDebtFixture }) };
+const entries = <T,>(fixtures: Record<string, T>, render: (data: T) => ReactNode): [string, () => ReactNode][] =>
+  Object.entries(fixtures).map(([name, data]) => [name, () => render(data)]);
 
 const sections: { title: string; entries: [string, () => ReactNode][] }[] = [
-  { title: "Landing", entries: [["landing", () => <LandingScreen />]] },
+  { title: titles.landing, entries: [[titles.landing, () => <LandingScreen />]] },
+  { title: titles.signIn, entries: entries(signInFixtures, (data) => <SignInScreen data={data} actions={signInActionsFixture} />) },
+  { title: titles.dashboard, entries: entries(dashboardFixtures, (data) => <DashboardScreen data={data} actions={dashboardActionsFixture} />) },
   {
-    title: "Entrar",
-    entries: Object.entries(signInFixtures).map(([name, data]) => [name, () => <SignInScreen data={data} actions={signInActions} />]),
-  },
-  {
-    title: "Mis cobros",
-    entries: Object.entries(dashboardFixtures).map(([name, data]) => [name, () => <DashboardScreen data={data} actions={dashboardActions} />]),
-  },
-  {
-    title: "Crear cobro",
+    title: titles.debtForm,
     entries: [
-      ...Object.entries(debtFormFixtures).map(([name, data]): [string, () => ReactNode] => [name, () => <DebtFormScreen data={data} actions={debtFormActions} cancelHref="#" />]),
-      ["cobro listo", () => <CreatedScreen debt={createdDebtFixture} creditorName="Pam" />],
+      ...entries(debtFormFixtures, (data) => <DebtFormScreen data={data} actions={debtFormActionsFixture} />),
+      [titles.created, () => <CreatedScreen debt={createdDebtFixture} creditorName="Pam" />],
     ],
   },
-  {
-    title: "Página del deudor",
-    entries: Object.entries(debtorPageFixtures).map(([name, data]) => [name, () => <DebtorScreen data={data} actions={debtorActions} />]),
-  },
+  { title: titles.debtor, entries: entries(debtorPageFixtures, (data) => <DebtorScreen data={data} actions={debtorActionsFixture} />) },
 ];
 
 export function Gallery() {

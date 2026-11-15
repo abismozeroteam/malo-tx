@@ -1,10 +1,17 @@
-import type { CatalogMemeKey } from "@/contracts/common";
+import type { ActionError, CatalogMemeKey } from "@/contracts/common";
 import type { DebtFormError } from "@/contracts/debt-form";
 import type { DebtSummaryStatus, DashboardFilter } from "@/contracts/dashboard";
 import type { SignInCodeError } from "@/contracts/sign-in";
 
+const common = {
+  currency: "MXN",
+  countryCode: "+52",
+  phonePlaceholder: "55 1234 5678",
+  invalidPhone: "El número debe tener 10 dígitos.",
+};
+
 export const es = {
-  brand: { name: "MALOTX", tagline: "Cobra lo que te deben, sin el drama." },
+  common,
 
   demo: {
     banner: "Modo demo: solo se cobra $0.01",
@@ -52,12 +59,9 @@ export const es = {
 
   signIn: {
     phoneLabel: "Número de WhatsApp",
-    phonePlaceholder: "55 1234 5678",
-    countryCode: "+52",
     start: "Abrir WhatsApp",
     startHint: "Te abrimos WhatsApp con un mensaje listo. Solo dale enviar.",
     safe: "Tus datos están seguros. Tú decides a quién cobrar.",
-    invalidPhone: "Escribe tu número de 10 dígitos.",
     codeTitle: "Tu WhatsApp es tu llave de entrada.",
     codeLead: (last4: string) =>
       `Mándanos el mensaje por WhatsApp y te contestamos con un código de 6 dígitos al número que termina en ${last4}.`,
@@ -85,7 +89,6 @@ export const es = {
     saveName: "Guardar",
     owed: "TE DEBEN",
     received: "Ya les cobraste",
-    currency: "MXN",
     create: "Cobrar a alguien",
     listTitle: "Tus cobros",
     filters: {
@@ -138,7 +141,6 @@ export const es = {
       firstName: "Nombre",
       firstNamePlaceholder: "Carlos",
       phone: "WhatsApp (opcional)",
-      phonePlaceholder: "55 9876 5432",
       owesYou: (name: string) => `${name || "Tu deudor"} te debe`,
       totalToSplit: "Total a dividir",
       splitMode: "Forma de dividir",
@@ -168,10 +170,9 @@ export const es = {
       required: "Esto no puede ir vacío.",
       too_long: "Es demasiado largo.",
       invalid_amount: "Escribe un monto válido, como 150.00.",
-      invalid_phone: "El número debe tener 10 dígitos.",
+      invalid_phone: common.invalidPhone,
       split_mismatch: "Los montos tienen que sumar el total.",
     } satisfies Record<DebtFormError, string>,
-    currency: "MXN",
   },
 
   created: {
@@ -193,11 +194,9 @@ export const es = {
 
   debtor: {
     owesTo: (debtor: string, creditor: string) => `${debtor}, le debes a ${creditor}.`,
-    meta: (debtName: string) => debtName,
     payBefore: (date: string) => `Paga antes del ${date}`,
     overdue: "Vencido",
     whatYouOwe: "LO QUE DEBES",
-    currency: "MXN",
     partOf: (total: string, debtName: string) => `Tu parte de ${total} · ${debtName}`,
     payWithCodi: "Paga con CoDi",
     qrAlt: "Código QR de CoDi para pagar",
@@ -219,7 +218,6 @@ export const es = {
       heading: "¿A qué número te lo mandamos?",
       lead: (amount: string) => `Te llega la solicitud de ${amount} a la app de tu banco. Tú solo la aceptas.`,
       label: "Tu número de celular (10 dígitos)",
-      placeholder: "55 1234 5678",
       privacy: "Solo lo usamos para mandarte este cobro. No lo guardamos.",
       submit: "Mandar el cobro a mi banco",
       sending: "Mandando…",
@@ -254,18 +252,26 @@ export const es = {
       lead: "Quien te cobraba lo borró o lo canceló. O el enlace está mal escrito.",
     },
     ctaOwn: "¿A ti también te deben? Cobra con MALOTX",
-    errors: {
-      network: "Algo falló de nuestro lado. Intenta otra vez.",
-      rate_limited: "Ya mandamos varios cobros a tu banco. Espera un minuto.",
-      invalid_phone: "El número debe tener 10 dígitos.",
-      push_failed: "No pudimos mandar el cobro a tu banco. Revisa el número o paga con el QR.",
-      already_answered: "Ya respondiste a este cobro.",
-      not_allowed: "Esto ya no se puede hacer.",
-    },
   },
 
+  actionErrors: {
+    network: "Algo falló de nuestro lado. Intenta otra vez.",
+    rate_limited: "Vas muy rápido. Espera un minuto e intenta otra vez.",
+    invalid_phone: common.invalidPhone,
+    push_failed: "No pudimos mandar el cobro a tu banco. Revisa el número o paga con el QR.",
+    already_answered: "Ya respondiste a este cobro.",
+    not_allowed: "Esto ya no se puede hacer.",
+  } satisfies Record<ActionError, string>,
   gallery: {
     title: "Galería de pantallas",
     lead: "Cada pantalla en cada estado, con datos de prueba. Solo existe en desarrollo.",
+    sections: {
+      landing: "Landing",
+      signIn: "Entrar",
+      dashboard: "Mis cobros",
+      debtForm: "Crear cobro",
+      created: "Cobro listo",
+      debtor: "Página del deudor",
+    },
   },
 } as const;

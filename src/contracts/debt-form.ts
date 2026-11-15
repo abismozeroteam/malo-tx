@@ -1,8 +1,13 @@
-import type { CatalogMemeKey, Cents, IsoDate } from "./common";
+import type { ActionError, CatalogMemeKey, Cents, IsoDate, MemeView } from "./common";
 
 export type MemeChoice =
   | { kind: "catalog"; key: CatalogMemeKey }
   | { kind: "upload"; id: string; src: string };
+
+export const toMemeView = (choice: MemeChoice, caption: string): MemeView =>
+  choice.kind === "catalog" ? { kind: "catalog", key: choice.key, caption } : { kind: "upload", src: choice.src, caption };
+
+export const memeChoiceId = (choice: MemeChoice) => (choice.kind === "catalog" ? `catalog:${choice.key}` : `upload:${choice.id}`);
 
 export type SplitMode = "equal" | "custom";
 
@@ -53,13 +58,14 @@ export type CreatedDebt = {
   name: string;
   totalCents: Cents;
   dueDate: IsoDate | null;
-  meme: MemeChoice;
-  caption: string;
+  meme: MemeView;
   links: CreatedLink[];
 };
 
 export type DebtFormActions = {
-  submit(values: DebtFormValues): Promise<{ ok: true; debt: CreatedDebt } | { ok: false; errors: DebtFormErrors }>;
+  submit(
+    values: DebtFormValues,
+  ): Promise<{ ok: true; debt: CreatedDebt } | { ok: false; errors: DebtFormErrors } | { ok: false; error: ActionError }>;
 };
 
 export const EMPTY_DEBT_FORM: DebtFormValues = {

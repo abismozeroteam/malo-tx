@@ -2,7 +2,9 @@ export type Cents = number;
 export type IsoDate = string;
 export type IsoDateTime = string;
 
-export type CatalogMemeKey = "a" | "b" | "c" | "d" | "e" | "paid";
+export const PICKABLE_MEMES = ["a", "b", "c", "d", "e"] as const;
+
+export type CatalogMemeKey = (typeof PICKABLE_MEMES)[number] | "paid";
 
 export type MemeView =
   | { kind: "catalog"; key: CatalogMemeKey; caption: string }

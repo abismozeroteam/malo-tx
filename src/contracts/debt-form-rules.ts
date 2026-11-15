@@ -1,5 +1,5 @@
 import type { Cents } from "./common";
-import type { DebtFormErrors, DebtFormStep, DebtFormValues } from "./debt-form";
+import type { DebtFormErrors, DebtFormField, DebtFormStep, DebtFormValues } from "./debt-form";
 import { toTenDigitPhone } from "./phone";
 import { splitEqually, splitGap } from "./split";
 
@@ -12,18 +12,35 @@ export const LIMITS = {
   maxTotalCents: 100_000_000,
 };
 
+export const DEBT_FORM_STEPS: DebtFormStep[] = ["what", "who", "style"];
+
+const FIELD_STEP: Record<DebtFormField, DebtFormStep> = {
+  name: "what",
+  total: "what",
+  meme: "what",
+  dueDate: "what",
+  people: "who",
+  split: "who",
+};
+
+export function firstStepWithErrors(errors: DebtFormErrors): DebtFormStep {
+  const steps = new Set<DebtFormStep>();
+  for (const field of Object.keys(errors)) steps.add(field in FIELD_STEP ? FIELD_STEP[field as DebtFormField] : "who");
+  return DEBT_FORM_STEPS.find((step) => steps.has(step)) ?? "style";
+}
+
+const equalShares = (values: DebtFormValues) =>
+  splitEqually(values.totalCents ?? 0, values.people.length + (values.includeMe ? 1 : 0));
+
 export function debtorAmounts(values: DebtFormValues): Cents[] {
-  const total = values.totalCents ?? 0;
   if (values.split === "custom") return values.people.map((person) => person.customCents ?? 0);
-  const shares = splitEqually(total, values.people.length + (values.includeMe ? 1 : 0));
-  return shares.slice(0, values.people.length);
+  return equalShares(values).slice(0, values.people.length);
 }
 
 export function myShare(values: DebtFormValues): Cents | null {
   if (!values.includeMe) return null;
   if (values.split === "custom") return values.myCustomCents ?? 0;
-  const shares = splitEqually(values.totalCents ?? 0, values.people.length + 1);
-  return shares[shares.length - 1] ?? 0;
+  return equalShares(values).at(-1) ?? 0;
 }
 
 export function remainingToSplit(values: DebtFormValues): Cents {

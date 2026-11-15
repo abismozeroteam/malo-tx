@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EMPTY_DEBT_FORM, type DebtFormValues } from "./debt-form";
-import { debtorAmounts, hasErrors, myShare, remainingToSplit, validateDebtForm } from "./debt-form-rules";
+import { debtorAmounts, firstStepWithErrors, hasErrors, myShare, remainingToSplit, validateDebtForm } from "./debt-form-rules";
 
 const person = (firstName: string, customCents: number | null = null, phone = "") => ({ firstName, phone, customCents });
 
@@ -81,5 +81,17 @@ describe("validateDebtForm", () => {
   it("only checks the requested step", () => {
     expect(hasErrors(validateDebtForm({ ...EMPTY_DEBT_FORM, people: [person("Ana")] }, "who"))).toBe(true);
     expect(hasErrors(validateDebtForm({ ...filled, people: [] }, "what"))).toBe(false);
+  });
+});
+
+describe("firstStepWithErrors", () => {
+  it("sends the user to the earliest step that has a problem", () => {
+    expect(firstStepWithErrors({ split: "split_mismatch", total: "required" })).toBe("what");
+    expect(firstStepWithErrors({ personNames: [0] })).toBe("who");
+    expect(firstStepWithErrors({ dueDate: "required" })).toBe("what");
+  });
+
+  it("stays on the last step when there are no field errors", () => {
+    expect(firstStepWithErrors({})).toBe("style");
   });
 });

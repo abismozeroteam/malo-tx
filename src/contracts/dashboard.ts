@@ -14,7 +14,7 @@ export type DebtCard = {
   dueDate: IsoDate | null;
 };
 
-export type DashboardFilter = "all" | "pending" | "paid" | "overdue";
+export type DashboardFilter = "all" | DebtSummaryStatus;
 
 export type DashboardData = {
   userName: string;
