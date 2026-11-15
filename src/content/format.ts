@@ -1,5 +1,7 @@
 import type { Cents, IsoDate, IsoDateTime } from "@/contracts/common";
 
+const TIME_ZONE = "America/Mexico_City";
+
 const money = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", currencyDisplay: "narrowSymbol" });
 const shortDate = new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 const dayMonth = new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "short", timeZone: "UTC" });
@@ -9,8 +11,12 @@ const dateTime = new Intl.DateTimeFormat("es-MX", {
   year: "numeric",
   hour: "numeric",
   minute: "2-digit",
-  timeZone: "America/Mexico_City",
+  timeZone: TIME_ZONE,
 });
+
+const isoDay = new Intl.DateTimeFormat("en-CA", { timeZone: TIME_ZONE });
+
+export const todayInMexicoCity = (now = new Date()): IsoDate => isoDay.format(now);
 
 const tidy = (value: string) => value.replace(/\./g, "").replace(/\s+/g, " ");
 

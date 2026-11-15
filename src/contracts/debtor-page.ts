@@ -4,6 +4,12 @@ export type DebtorStatus = "pending" | "claims_paid" | "disputed" | "paid" | "ca
 
 export type CodiQr = { imageSrc: string; expiresAt: IsoDateTime };
 
+export const QR_MIN_LEFT_MS = 60_000;
+
+export type DebtorAnswer = Extract<DebtorStatus, "claims_paid" | "disputed">;
+
+export type QrResult = { ok: true; qr: CodiQr } | { ok: false; error: ActionError };
+
 type DebtorPageBase = {
   debtorName: string;
   creditorName: string;
@@ -28,7 +34,7 @@ export type DebtorPageData =
   | (DebtorPageBase & { state: "paid"; paidAt: IsoDateTime });
 
 export type DebtorPageActions = {
-  requestQr(): Promise<{ ok: true; qr: CodiQr } | { ok: false; error: ActionError }>;
+  requestQr(): Promise<QrResult>;
   sendPush(phone: string): Promise<ActionResult>;
   claimPaid(): Promise<ActionResult>;
   dispute(): Promise<ActionResult>;

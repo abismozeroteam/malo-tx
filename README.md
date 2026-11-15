@@ -20,8 +20,9 @@ $0.01 MXN.
 1. Creas un cobro: nombre, monto, fecha límite opcional y un meme.
 2. Eliges a quién cobrarle y cómo dividirlo: partes iguales o montos a mano.
 3. Cada persona recibe su propio enlace, que mandas desde tu WhatsApp.
-4. Quien debe abre el enlace y paga con CoDi: escanea el QR o recibe la
-   solicitud en la app de su banco.
+4. Quien debe abre el enlace y paga con CoDi: escanea el QR (dura 10 minutos y
+   se renueva solo) o recibe la solicitud en la app de su banco. También puede
+   responder una vez "Ya te pagué" o "No debo esto".
 5. pey confirma el pago y la página cambia a "Cobrado." en segundos.
 
 ## Memes
@@ -87,5 +88,12 @@ Los enlaces de cobro usan el dominio de producción que Vercel pone en
 - Las sesiones guardan solo el hash del token. Entrar y crear cobros tienen
   límite por IP, y crear cobros también por usuario.
 - La página que abre quien debe solo muestra su nombre de pila; nunca
-  teléfonos ni cuentas bancarias.
+  teléfonos ni cuentas bancarias. No aparece en buscadores (`noindex`).
+- El QR lo pide el navegador ya abierta la página, así que las vistas previas
+  de los enlaces nunca generan cobros. Un enlace pagado o cancelado no recibe
+  QR ni solicitudes.
+- El número que se escribe para la solicitud al banco solo se manda a pey; no
+  se guarda.
+- Pedir QR, mandar solicitudes y responder tienen límite por enlace y por IP
+  (`RATE_LIMITS` en `src/server/rate-limit.ts`).
 - Cada commit y el historial completo pasan por un escáner de secretos.
