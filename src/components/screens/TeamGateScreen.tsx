@@ -20,7 +20,6 @@ export function TeamGateScreen({ action }: { action: TeamGateAction }) {
       <Wordmark className="self-center" />
       <PageHeading title={t.title} lead={t.lead} className="mt-6" />
       <form action={formAction} className="flex w-full flex-col gap-4">
-        <TextField name="secret" type="password" label={t.secretLabel} autoComplete="current-password" required />
         <TextField name="name" label={t.nameLabel} hint={t.nameHint} autoComplete="given-name" maxLength={LIMITS.firstName} required />
         {state.error && <Notice tone="danger">{t.error[state.error]}</Notice>}
         <Button type="submit" disabled={pending}>

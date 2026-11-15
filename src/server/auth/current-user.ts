@@ -19,13 +19,17 @@ export async function requireUser(): Promise<SessionUser> {
   return user;
 }
 
-export async function signUpWithCookie(displayName: string) {
-  const { token, expiresAt } = await signUp(db(), displayName);
+// No expiry on the cookie: it ends with the browser session.
+async function setSessionCookie(token: string) {
   (await cookies()).set(COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    expires: expiresAt,
   });
 }
+
+export async function signUpWithCookie(displayName: string) {
+  await setSessionCookie((await signUp(db(), displayName)).token);
+}
+
