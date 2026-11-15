@@ -10,7 +10,6 @@ type DebtorPageBase = {
   debtName: string;
   amountCents: Cents;
   demoMode: boolean;
-  meme: MemeView;
 };
 
 export type DebtorPageData =
@@ -18,6 +17,7 @@ export type DebtorPageData =
   | (DebtorPageBase & {
       state: "open";
       status: "pending" | "claims_paid" | "disputed";
+      meme: MemeView;
       totalCents: Cents | null;
       dueDate: IsoDate | null;
       overdue: boolean;

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { DashboardActions, DashboardData, DashboardFilter, DebtCard as DebtCardData } from "@/contracts/dashboard";
 import { routes } from "@/contracts/routes";
+import { catalogMemeView } from "@/content/memes";
 import { es } from "@/content/es";
 import { formatDayMonth, formatMoney } from "@/content/format";
 import { BottomNav } from "@/components/ui/BottomNav";
@@ -40,7 +41,7 @@ export function DashboardScreen({ data, actions }: { data: DashboardData; action
 
         {data.debts.length === 0 ? (
           <section className="flex flex-col items-center gap-3 py-6 text-center">
-            <MemeCard meme={{ kind: "catalog", key: "e", caption: "" }} size="banner" />
+            <MemeCard meme={catalogMemeView("e", "")} />
             <h2 className="text-subtitle font-bold">{t.emptyTitle}</h2>
             <p className="text-body leading-ui text-muted">{t.emptyHint}</p>
           </section>

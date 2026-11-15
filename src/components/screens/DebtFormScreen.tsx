@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PICKABLE_MEMES, type ActionError } from "@/contracts/common";
+import type { ActionError } from "@/contracts/common";
 import {
   memeChoiceId,
   toMemeView,
@@ -26,6 +26,7 @@ import {
 } from "@/contracts/debt-form-rules";
 import { routes } from "@/contracts/routes";
 import { es } from "@/content/es";
+import { captionFor, defaultCaptionFor, MEME_CATALOG, PICKER_MEMES } from "@/content/memes";
 import { centsFromInput, centsToInput, formatMoney } from "@/content/format";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -86,7 +87,7 @@ export function DebtFormScreen({ data, actions }: { data: DebtFormData; actions:
       />
       {step === "what" && <WhatStep values={values} errors={errors} uploads={data.uploads} update={update} onNext={next} />}
       {step === "who" && <WhoStep values={values} errors={errors} creditorName={data.creditorName} update={update} onNext={next} />}
-      {step === "style" && <StyleStep values={values} update={update} submitting={submitting} failure={failure} onSubmit={submit} />}
+      {step === "style" && <StyleStep values={values} errors={errors} update={update} submitting={submitting} failure={failure} onSubmit={submit} />}
     </Screen>
   );
 }
@@ -122,8 +123,7 @@ function MoneyInput({
 
 function WhatStep({ values, errors, uploads, update, onNext }: StepProps & { uploads: DebtFormData["uploads"] }) {
   const pickedId = values.meme ? memeChoiceId(values.meme) : null;
-  const pick = (meme: MemeChoice) =>
-    update({ meme, caption: meme.kind === "catalog" && !values.caption ? es.memes.defaultCaption[meme.key] : values.caption });
+  const pick = (meme: MemeChoice) => update({ meme, caption: values.caption });
 
   return (
     <>
@@ -157,7 +157,7 @@ function WhatStep({ values, errors, uploads, update, onNext }: StepProps & { upl
           </>
         )}
         <p className="text-small font-semibold text-muted">{t.what.catalog}</p>
-        <MemeGrid options={PICKABLE_MEMES.map((key) => ({ kind: "catalog", key }))} pickedId={pickedId} onPick={pick} />
+        <MemeGrid options={PICKER_MEMES.map(({ key }) => ({ kind: "catalog", key }))} pickedId={pickedId} onPick={pick} />
         {errors.meme && <p className="text-small text-danger-ink">{t.errors[errors.meme]}</p>}
       </fieldset>
 
@@ -177,10 +177,10 @@ function MemeGrid({ options, pickedId, onPick }: { options: MemeChoice[]; picked
             type="button"
             aria-pressed={id === pickedId}
             onClick={() => onPick(meme)}
-            className={cx("flex flex-col items-center gap-1 rounded-control p-1", id === pickedId ? "ring-2 ring-brand" : "ring-1 ring-line")}
+            aria-label={es.memes.pick(meme.kind === "catalog" ? MEME_CATALOG[meme.key].alt : es.memes.uploadAlt)}
+            className={cx("rounded-control p-1", id === pickedId ? "ring-3 ring-brand" : "ring-1 ring-line")}
           >
             <MemeCard meme={toMemeView(meme, "")} size="tile" />
-            {meme.kind === "catalog" && <span className="text-caption text-muted">{es.memes.shortName[meme.key]}</span>}
           </button>
         );
       })}
@@ -310,23 +310,33 @@ function WhoStep({ values, errors, creditorName, update, onNext }: StepProps & {
 
 function StyleStep({
   values,
+  errors,
   update,
   submitting,
   failure,
   onSubmit,
-}: Pick<StepProps, "values" | "update"> & { submitting: boolean; failure: ActionError | null; onSubmit: () => void }) {
+}: Pick<StepProps, "values" | "errors" | "update"> & { submitting: boolean; failure: ActionError | null; onSubmit: () => void }) {
   const amounts = debtorAmounts(values);
   return (
     <>
       <PageHeading title={t.style.heading} lead={t.style.lead} />
       {values.meme && (
         <DebtPreview
-          meme={toMemeView(values.meme, values.caption)}
+          meme={toMemeView(values.meme, captionFor(values.meme, values.caption))}
           name={values.name}
           rows={<ValueRow label={t.style.yourPart(values.people[0]?.firstName ?? "")} value={`${formatMoney(amounts[0] ?? 0)} ${es.common.currency}`} />}
         />
       )}
-      <TextField name="caption" label={t.style.caption} maxLength={LIMITS.caption} value={values.caption} onChange={(e) => update({ caption: e.target.value })} />
+      <TextField
+        name="caption"
+        label={t.style.caption}
+        maxLength={LIMITS.caption}
+        placeholder={defaultCaptionFor(values.meme)}
+        value={values.caption}
+        onChange={(e) => update({ caption: e.target.value })}
+        hint={t.style.captionHint(LIMITS.caption)}
+        error={errorText(errors.caption)}
+      />
       {failure && <Notice tone="danger">{es.actionErrors[failure]}</Notice>}
       <Button onClick={onSubmit} disabled={submitting}>
         {submitting ? t.style.submitting : t.style.submit}

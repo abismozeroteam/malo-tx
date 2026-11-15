@@ -13,6 +13,8 @@ const common = {
 export const es = {
   common,
 
+  brand: { name: "MALOTX", tagline: "Cobra lo que te deben, sin el drama." },
+
   demo: {
     banner: "Modo demo: solo se cobra $0.01",
     paidBanner: "Modo demo: en realidad se cobraron $0.01",
@@ -23,27 +25,20 @@ export const es = {
       a: "Págame o me porto mal.",
       b: "Huelo que ya te cayó la quincena.",
       c: "No te hagas. Ya sabes a qué vengo.",
-      d: "Sé dónde vives. (Vivimos juntos.)",
+      d: "Mira cómo me tienes.",
       e: "Te vi en línea.",
       paid: "Así sí. Hasta la próxima deuda.",
     } satisfies Record<CatalogMemeKey, string>,
     alt: {
-      a: "Chihuahua con cuernos de diablo y sonrisa traviesa",
-      b: "Chihuahua con signos de pesos en los ojos",
-      c: "Chihuahua con lentes oscuros y cadena de oro",
-      d: "Chihuahua con parche en el ojo y mirada fría",
-      e: "Chihuahua detective con monóculo y sombrero",
-      paid: "Chihuahua con cuernos, lentes y un billete en la boca",
-    } satisfies Record<CatalogMemeKey, string>,
-    shortName: {
-      a: "cuernos",
-      b: "$ $",
-      c: "lentes",
-      d: "parche",
-      e: "lupa",
-      paid: "cobrado",
+      a: "Chihuahua con cuernos de diablo sonriendo con todos los dientes",
+      b: "Chihuahua con signos de pesos en los ojos y un fajo de billetes",
+      c: "Chihuahua musculoso con lentes oscuros y cadena de oro",
+      d: "Chihuahua con parche en el ojo llorando sobre una cartera vacía",
+      e: "Chihuahua entrecerrando los ojos con sospecha",
+      paid: "Chihuahua con cuernos y lentes oscuros con un billete en el hocico",
     } satisfies Record<CatalogMemeKey, string>,
     uploadAlt: "Imagen del cobro",
+    pick: (alt: string) => `Elegir: ${alt}`,
   },
 
   landing: {
@@ -163,6 +158,7 @@ export const es = {
       lead: "Así lo va a ver tu deudor.",
       yourPart: (name: string) => `${name || "Tu deudor"} · Tu parte`,
       caption: "Texto del meme",
+      captionHint: (max: number) => `Hasta ${max} caracteres. Si lo dejas vacío, usamos el del meme.`,
       submit: "Soltar el cobro",
       submitting: "Soltando…",
     },

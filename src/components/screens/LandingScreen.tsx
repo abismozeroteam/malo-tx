@@ -1,5 +1,6 @@
 import { routes } from "@/contracts/routes";
 import { es } from "@/content/es";
+import { catalogMemeView } from "@/content/memes";
 import { LinkButton } from "@/components/ui/Button";
 import { MemeCard } from "@/components/ui/MemeCard";
 import { Screen } from "@/components/ui/Screen";
@@ -11,7 +12,7 @@ export function LandingScreen() {
   return (
     <Screen>
       <Wordmark className="self-center" />
-      <MemeCard meme={{ kind: "catalog", key: "a", caption: es.memes.defaultCaption.a }} />
+      <MemeCard meme={catalogMemeView("a")} preload />
       <h1 className="text-title font-bold leading-heading">{t.headline}</h1>
       <p className="text-lead leading-ui">{t.lead}</p>
       <ul className="flex flex-col gap-2 text-body leading-ui text-muted">

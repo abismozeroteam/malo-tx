@@ -9,7 +9,9 @@ body {
 
 .meme-caption {
   text-transform: uppercase;
-  -webkit-text-stroke: 1.5px var(--color-ink);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  -webkit-text-stroke: 0.14em var(--color-ink);
   paint-order: stroke fill;
-  text-shadow: 0 2px 0 var(--color-ink);
+  text-shadow: 0 0.06em 0.12em rgb(0 0 0 / 0.6);
 }

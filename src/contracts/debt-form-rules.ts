@@ -7,7 +7,7 @@ export const LIMITS = {
   name: 60,
   description: 140,
   firstName: 30,
-  caption: 80,
+  caption: 60,
   people: 20,
   maxTotalCents: 100_000_000,
 };
@@ -21,6 +21,7 @@ const FIELD_STEP: Record<DebtFormField, DebtFormStep> = {
   dueDate: "what",
   people: "who",
   split: "who",
+  caption: "style",
 };
 
 export function firstStepWithErrors(errors: DebtFormErrors): DebtFormStep {
@@ -58,6 +59,10 @@ function validateWhat(values: DebtFormValues, errors: DebtFormErrors) {
   if (!values.meme) errors.meme = "required";
 }
 
+function validateStyle(values: DebtFormValues, errors: DebtFormErrors) {
+  if (values.caption.trim().length > LIMITS.caption) errors.caption = "too_long";
+}
+
 function validateWho(values: DebtFormValues, errors: DebtFormErrors) {
   if (values.people.length === 0 || values.people.length > LIMITS.people) errors.people = "required";
   const personNames = values.people.flatMap((p, i) => (!p.firstName.trim() || p.firstName.trim().length > LIMITS.firstName ? [i] : []));
@@ -74,6 +79,7 @@ export function validateDebtForm(values: DebtFormValues, step: DebtFormStep | "a
   const errors: DebtFormErrors = {};
   if (step === "what" || step === "all") validateWhat(values, errors);
   if (step === "who" || step === "all") validateWho(values, errors);
+  if (step === "style" || step === "all") validateStyle(values, errors);
   return errors;
 }
 

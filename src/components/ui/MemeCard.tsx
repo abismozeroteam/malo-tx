@@ -1,15 +1,7 @@
-import type { CatalogMemeKey, MemeView } from "@/contracts/common";
-import { es } from "@/content/es";
+import Image from "next/image";
+import type { MemeView } from "@/contracts/common";
+import { resolveMeme } from "@/content/memes";
 import { cx } from "./cx";
-
-const placeholder: Record<CatalogMemeKey, string> = {
-  a: "bg-meme-a",
-  b: "bg-meme-b",
-  c: "bg-meme-c",
-  d: "bg-meme-d",
-  e: "bg-meme-e",
-  paid: "bg-meme-paid",
-};
 
 type Size = "hero" | "banner" | "tile" | "thumb";
 
@@ -20,31 +12,37 @@ const frames: Record<Size, string> = {
   thumb: "size-12 rounded-small",
 };
 
-const captions: Record<Size, string> = {
-  hero: "text-meme px-4.5 pb-5",
-  banner: "text-lead px-3 pb-3",
-  tile: "hidden",
-  thumb: "hidden",
+const imageSizes: Record<Size, string> = {
+  hero: "(max-width: 430px) 100vw, 430px",
+  banner: "(max-width: 430px) 100vw, 430px",
+  tile: "140px",
+  thumb: "48px",
 };
 
-export function MemeCard({ meme, size = "hero", className }: { meme: MemeView; size?: Size; className?: string }) {
-  const background = meme.kind === "catalog" ? placeholder[meme.key] : "bg-ink";
-  const alt = meme.kind === "catalog" ? es.memes.alt[meme.key] : es.memes.uploadAlt;
+const captionText: Record<Size, string | null> = {
+  hero: "text-meme px-4.5 py-5",
+  banner: "text-lead px-3 py-3",
+  tile: null,
+  thumb: null,
+};
+
+export function MemeCard({ meme, size = "hero", preload = false }: { meme: MemeView; size?: Size; preload?: boolean }) {
+  const { src, alt, captionPosition } = resolveMeme(meme);
+  const caption = captionText[size];
   return (
-    <figure className={cx("relative shrink-0 overflow-hidden", frames[size], background, className)}>
-      {meme.kind === "upload" && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={meme.src} alt={alt} className="absolute inset-0 size-full object-cover" />
+    <figure className={cx("relative shrink-0 overflow-hidden bg-neutral-soft", frames[size])}>
+      <Image src={src} alt={alt} fill sizes={imageSizes[size]} preload={preload} className="object-cover" />
+      {caption && meme.caption && (
+        <figcaption
+          className={cx(
+            "meme-caption absolute inset-x-0 line-clamp-3 text-center font-black leading-meme text-on-brand",
+            captionPosition === "top" ? "top-0" : "bottom-0",
+            caption,
+          )}
+        >
+          {meme.caption}
+        </figcaption>
       )}
-      {meme.kind === "catalog" && <span className="sr-only">{alt}</span>}
-      <figcaption
-        className={cx(
-          "meme-caption absolute inset-x-0 bottom-0 text-center font-bold leading-meme text-on-brand",
-          captions[size],
-        )}
-      >
-        {meme.caption}
-      </figcaption>
     </figure>
   );
 }

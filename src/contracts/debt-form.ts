@@ -26,7 +26,7 @@ export type DebtFormValues = {
   myCustomCents: Cents | null;
 };
 
-export type DebtFormField = "name" | "total" | "meme" | "people" | "split" | "dueDate";
+export type DebtFormField = "name" | "total" | "meme" | "people" | "split" | "dueDate" | "caption";
 
 export type DebtFormError = "required" | "too_long" | "invalid_amount" | "invalid_phone" | "split_mismatch";
 
@@ -73,7 +73,7 @@ export const EMPTY_DEBT_FORM: DebtFormValues = {
   description: "",
   dueDate: "",
   totalCents: null,
-  meme: null,
+  meme: { kind: "catalog", key: "a" },
   caption: "",
   people: [{ firstName: "", phone: "", customCents: null }],
   split: "equal",

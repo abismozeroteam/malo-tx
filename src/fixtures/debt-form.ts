@@ -1,6 +1,5 @@
 import { EMPTY_DEBT_FORM, toMemeView, type CreatedDebt, type DebtFormData, type DebtFormValues } from "@/contracts/debt-form";
-import { es } from "@/content/es";
-import { sampleQrImage } from "./qr";
+import { captionFor } from "@/content/memes";
 
 const filled: DebtFormValues = {
   ...EMPTY_DEBT_FORM,
@@ -8,8 +7,8 @@ const filled: DebtFormValues = {
   description: "Cena en La Terraza. Incluye comida, bebidas y propina.",
   dueDate: "2026-11-20",
   totalCents: 180000,
-  meme: { kind: "catalog", key: "a" },
-  caption: es.memes.defaultCaption.a,
+  meme: { kind: "catalog", key: "b" },
+  caption: "",
   people: [
     { firstName: "Ana", phone: "55 2345 6789", customCents: null },
     { firstName: "Pedro", phone: "", customCents: null },
@@ -22,8 +21,8 @@ const base = { creditorName: "Pam", errors: {}, uploads: [] };
 
 export const debtFormFixtures: Record<string, DebtFormData> = {
   "vacío": { ...base, step: "what", values: EMPTY_DEBT_FORM },
-  "lleno · paso 1 con mis memes": { ...base, step: "what", values: filled, uploads: [{ id: "u1", src: sampleQrImage }] },
-  "con errores · paso 1": { ...base, step: "what", values: EMPTY_DEBT_FORM, errors: { name: "required", total: "required", meme: "required" } },
+  "lleno · paso 1 con mis memes": { ...base, step: "what", values: filled, uploads: [{ id: "u1", src: "/memes/c.jpg" }] },
+  "con errores · paso 1": { ...base, step: "what", values: EMPTY_DEBT_FORM, errors: { name: "required", total: "required" } },
   "paso 2 · una persona": { ...base, step: "who", values: { ...filled, people: [{ firstName: "Carlos", phone: "", customCents: null }], includeMe: false } },
   "paso 2 · partes iguales": { ...base, step: "who", values: filled },
   "paso 2 · personalizado con faltante": {
@@ -49,7 +48,7 @@ export const createdDebtFixture: CreatedDebt = {
   name: filled.name,
   totalCents: filled.totalCents!,
   dueDate: filled.dueDate || null,
-  meme: toMemeView(filled.meme!, filled.caption),
+  meme: toMemeView(filled.meme!, captionFor(filled.meme, filled.caption)),
   links: [
     { firstName: "Ana", amountCents: 45000, url: "https://malo-tx.vercel.app/c/ejemplo-ana", whatsappUrl: "https://wa.me/525523456789" },
     { firstName: "Pedro", amountCents: 45000, url: "https://malo-tx.vercel.app/c/ejemplo-pedro", whatsappUrl: "https://wa.me/" },

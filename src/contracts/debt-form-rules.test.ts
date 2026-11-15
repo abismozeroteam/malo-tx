@@ -52,7 +52,7 @@ describe("validateDebtForm", () => {
   });
 
   it("requires name, amount and image on the first step", () => {
-    expect(validateDebtForm(EMPTY_DEBT_FORM, "what")).toEqual({ name: "required", total: "required", meme: "required" });
+    expect(validateDebtForm({ ...EMPTY_DEBT_FORM, meme: null }, "what")).toEqual({ name: "required", total: "required", meme: "required" });
   });
 
   it.each([0, -100, 1.5, 100_000_001])("rejects a total of %s centavos", (totalCents) => {
@@ -76,6 +76,11 @@ describe("validateDebtForm", () => {
 
   it("blocks an equal split that leaves someone at zero", () => {
     expect(validateDebtForm({ ...filled, totalCents: 2 }, "who").split).toBe("invalid_amount");
+  });
+
+  it("rejects a caption over the limit", () => {
+    expect(validateDebtForm({ ...filled, caption: "x".repeat(61) }, "style").caption).toBe("too_long");
+    expect(validateDebtForm({ ...filled, caption: "x".repeat(60) }, "style")).toEqual({});
   });
 
   it("only checks the requested step", () => {

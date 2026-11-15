@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { ActionError, ActionResult } from "@/contracts/common";
 import type { CodiQr, DebtorPageActions, DebtorPageData } from "@/contracts/debtor-page";
 import { routes } from "@/contracts/routes";
+import { catalogMemeView } from "@/content/memes";
 import { es } from "@/content/es";
 import { formatDate, formatDateTime, formatMoney } from "@/content/format";
 import { Button, LinkButton } from "@/components/ui/Button";
@@ -45,7 +46,7 @@ function OpenView({ data, actions }: { data: OpenData; actions: DebtorPageAction
   const [error, setError] = useState<ActionError | null>(null);
   const qr = useFreshQr(data.qr, actions.requestQr);
 
-  const meme = reported ? { kind: "catalog" as const, key: "a" as const, caption: data.meme.caption } : data.meme;
+  const meme = reported ? catalogMemeView("a", data.meme.caption) : data.meme;
   const amount = formatMoney(data.amountCents);
 
   if (view === "push") {
@@ -69,7 +70,7 @@ function OpenView({ data, actions }: { data: OpenData; actions: DebtorPageAction
   return (
     <Screen>
       <Header demoMode={data.demoMode} banner={banner} />
-      <MemeCard meme={meme} />
+      <MemeCard meme={meme} preload />
 
       {data.status === "pending" && (
         <>
@@ -252,7 +253,7 @@ function PaidView({ data }: { data: PaidData }) {
   return (
     <Screen>
       <Wordmark className="self-center" />
-      <MemeCard meme={data.meme} />
+      <MemeCard meme={catalogMemeView("paid")} preload />
       <PageHeading size="hero" title={t.paid.heading} lead={t.paid.lead(data.debtorName, data.creditorName)} />
       <Card tone="outlined">
         <p className="flex items-center justify-between gap-3">
@@ -272,7 +273,7 @@ function GoneView() {
   return (
     <Screen>
       <Wordmark className="self-center" />
-      <MemeCard meme={{ kind: "catalog", key: "c", caption: t.gone.caption }} />
+      <MemeCard meme={catalogMemeView("e", t.gone.caption)} preload />
       <PageHeading title={t.gone.heading} lead={t.gone.lead} />
       <LinkButton href={routes.home}>{t.ctaOwn}</LinkButton>
     </Screen>
