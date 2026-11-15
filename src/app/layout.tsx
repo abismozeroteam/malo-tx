@@ -12,11 +12,9 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
-  title: es.brand.name,
+  title: { default: es.brand.name, template: `%s · ${es.brand.name}` },
   description: es.brand.tagline,
-  alternates: { canonical: "/" },
-  openGraph: { title: es.brand.name, description: es.brand.tagline, siteName: es.brand.name, url: "/", locale: "es_MX", type: "website" },
-  twitter: { card: "summary_large_image" },
+  openGraph: { siteName: es.brand.name, locale: "es_MX", type: "website" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
