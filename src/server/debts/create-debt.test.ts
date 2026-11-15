@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestDb } from "../../../test/db";
+import { es } from "@/content/es";
 import { EMPTY_DEBT_FORM } from "@/contracts/debt-form";
 import type { ValidDebtForm } from "../validation/debt-form";
 import type { Database } from "../db";
@@ -69,6 +70,12 @@ describe("createDebt", () => {
   });
 });
 
+describe("share text", () => {
+  it("has no emoji, which WhatsApp Desktop mangles in wa.me links", () => {
+    expect(es.created.shareText("Ana", "https://malo.test/c/x")).not.toMatch(/\p{Extended_Pictographic}/u);
+  });
+});
+
 describe("whatsappShareUrl", () => {
   it("encodes the message", () => {
     expect(whatsappShareUrl(null, "hola & adiós")).toBe("https://wa.me/?text=hola%20%26%20adi%C3%B3s");
@@ -94,11 +101,3 @@ describe("loadCreatedDebt", () => {
   });
 });
 
-describe("share text", () => {
-  it("has no emoji, which WhatsApp Desktop mangles in wa.me links", async () => {
-    const db = await createTestDb();
-    const owner = (await signUp(db, "Eduardo")).userId;
-    const [link] = (await createDebt(db, owner, values, "https://malo.test")).links;
-    expect(decodeURIComponent(link.whatsappUrl)).not.toMatch(/\p{Extended_Pictographic}/u);
-  });
-});
