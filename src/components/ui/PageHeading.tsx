@@ -1,16 +1,16 @@
 import type { ReactNode } from "react";
 import { cx } from "./cx";
 
-type Size = "subtitle" | "title" | "hero";
+type Size = "sm" | "md" | "lg";
 
-const titleSize: Record<Size, string> = { subtitle: "text-heading-sm", title: "text-heading-md", hero: "text-heading-lg" };
+const titleSize: Record<Size, string> = { sm: "text-heading-sm", md: "text-heading-md", lg: "text-heading-lg" };
 
-const leadSize: Record<Size, string> = { subtitle: "text-body", title: "text-body", hero: "text-lead" };
+const leadSize: Record<Size, string> = { sm: "text-body", md: "text-body", lg: "text-lead" };
 
 export function PageHeading({
   title,
   lead,
-  size = "title",
+  size = "md",
   className,
 }: {
   title: ReactNode;

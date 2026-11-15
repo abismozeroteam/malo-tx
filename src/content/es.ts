@@ -203,7 +203,7 @@ export const es = {
     downloadQr: "Descargar QR",
     qrHint: "Este QR abre el enlace del cobro, no cobra solo.",
     toDashboard: "Ir a mis cobros",
-    shareText: (name: string, url: string) => `${name}, tienes un cobro pendiente conmigo 👀 ${url}`,
+    shareText: (name: string, url: string) => `${name}, tienes un cobro pendiente conmigo: ${url}`,
   },
 
   debtor: {
