@@ -5,5 +5,6 @@ export const routes = {
   newDebt: "/cobros/nuevo",
   debt: (ref: string) => `/cobros/${ref}`,
   debtor: (token: string) => `/c/${token}`,
+  debtorQr: (token: string, version: number) => `/c/${token}/qr?v=${version}`,
   profile: "/perfil",
 };

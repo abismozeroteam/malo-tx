@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { ActionError, ActionResult } from "@/contracts/common";
-import type { CodiQr, DebtorPageActions, DebtorPageData } from "@/contracts/debtor-page";
+import { QR_MIN_LEFT_MS, type CodiQr, type DebtorPageActions, type DebtorPageData } from "@/contracts/debtor-page";
 import { routes } from "@/contracts/routes";
 import { catalogMemeView, debtorPageMeme, REPORTED_FALLBACK_KEY } from "@/content/memes";
 import { es } from "@/content/es";
@@ -280,15 +280,22 @@ function GoneView() {
   );
 }
 
+const MIN_REFRESH_MS = 30_000;
+
 function useFreshQr(initial: CodiQr | null, requestQr: DebtorPageActions["requestQr"]) {
   const [qr, setQr] = useState(initial);
   useEffect(() => {
-    const wait = qr ? new Date(qr.expiresAt).getTime() - Date.now() : 0;
-    const timer = setTimeout(async () => {
+    const wait = qr ? Math.max(new Date(qr.expiresAt).getTime() - QR_MIN_LEFT_MS - Date.now(), MIN_REFRESH_MS) : 0;
+    const refresh = async () => {
+      if (document.hidden) return document.addEventListener("visibilitychange", refresh, { once: true });
       const result = await requestQr();
       if (result.ok) setQr(result.qr);
-    }, Math.max(wait, 0));
-    return () => clearTimeout(timer);
+    };
+    const timer = setTimeout(refresh, wait);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", refresh);
+    };
   }, [qr, requestQr]);
   return qr;
 }

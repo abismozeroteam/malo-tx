@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assertChargeAllowed, centsToPesos, ChargeNotAllowedError, pesosToCents } from "./charge-rules";
+import { assertChargeAllowed, centsToPesos, ChargeNotAllowedError, chargeAmountCents, pesosToCents } from "./charge-rules";
 
 describe("assertChargeAllowed", () => {
   it("allows exactly one centavo in demo mode", () => {
@@ -30,5 +30,12 @@ describe("money conversion", () => {
     expect(pesosToCents(0.01)).toBe(1);
     expect(pesosToCents(0.1 + 0.2)).toBe(30);
     expect(pesosToCents(150)).toBe(15000);
+  });
+});
+
+describe("chargeAmountCents", () => {
+  it("charges one centavo in demo mode and the real amount otherwise", () => {
+    expect(chargeAmountCents(15000, true)).toBe(1);
+    expect(chargeAmountCents(15000, false)).toBe(15000);
   });
 });

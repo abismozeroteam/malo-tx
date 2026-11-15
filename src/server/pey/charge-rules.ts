@@ -11,6 +11,8 @@ export function assertChargeAllowed(amountCents: number, demoMode: boolean) {
   }
 }
 
+export const chargeAmountCents = (amountCents: number, demoMode: boolean) => (demoMode ? DEMO_MAX_CENTS : amountCents);
+
 export const centsToPesos = (cents: number) => cents / 100;
 
 export const pesosToCents = (pesos: number) => Math.round(pesos * 100);
