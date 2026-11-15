@@ -1,8 +1,8 @@
 import "server-only";
 import { isDemoMode, requireEnv } from "../env";
+import { assertChargeAllowed, centsToPesos } from "./charge-rules";
 
 const BASE_URL = "https://api.pey.mx";
-const DEMO_MAX_CENTS = 1;
 
 export class PeyError extends Error {
   constructor(
@@ -16,17 +16,6 @@ export class PeyError extends Error {
 }
 
 type Metadata = Record<string, string | number | boolean | null>;
-
-function assertChargeAllowed(amountCents: number) {
-  if (!Number.isInteger(amountCents) || amountCents <= 0) {
-    throw new Error("Amount must be a positive integer of centavos");
-  }
-  if (isDemoMode() && amountCents > DEMO_MAX_CENTS) {
-    throw new Error("DEMO_MODE refuses charges above $0.01");
-  }
-}
-
-const toPesos = (cents: number) => Math.round(cents) / 100;
 
 async function peyFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -61,11 +50,11 @@ export function createCodiQr(input: {
   metadata: Metadata;
   generateImage?: boolean;
 }): Promise<CreateQrResult> {
-  assertChargeAllowed(input.amountCents);
+  assertChargeAllowed(input.amountCents, isDemoMode());
   return peyFetch("/codi/qr", {
     method: "POST",
     body: JSON.stringify({
-      amount: toPesos(input.amountCents),
+      amount: centsToPesos(input.amountCents),
       concept: input.concept,
       expiration: input.expirationSeconds,
       numRef: input.numRef,
@@ -85,14 +74,14 @@ export function createCodiPush(input: {
   numRef: string;
   metadata: Metadata;
 }): Promise<CreatePushResult> {
-  assertChargeAllowed(input.amountCents);
+  assertChargeAllowed(input.amountCents, isDemoMode());
   if (!/^[0-9]{10}$/.test(input.phoneNumber)) {
     throw new Error("Phone number must be exactly 10 digits");
   }
   return peyFetch("/codi/pn", {
     method: "POST",
     body: JSON.stringify({
-      amount: toPesos(input.amountCents),
+      amount: centsToPesos(input.amountCents),
       phoneNumber: input.phoneNumber,
       concept: input.concept,
       expiration: input.expirationSeconds,
