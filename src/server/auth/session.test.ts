@@ -32,4 +32,3 @@ describe("sessions", () => {
     expect(await findSessionUser(db, token)).toBeNull();
   });
 });
-

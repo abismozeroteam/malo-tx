@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import type { TeamGateAction } from "@/contracts/team-gate";
+import type { GuestEntryAction } from "@/contracts/guest-entry";
 import { LIMITS } from "@/contracts/debt-form-rules";
 import { es } from "@/content/es";
 import { Button } from "@/components/ui/Button";
@@ -11,9 +11,9 @@ import { Screen } from "@/components/ui/Screen";
 import { TextField } from "@/components/ui/TextField";
 import { Wordmark } from "@/components/ui/Wordmark";
 
-const t = es.teamGate;
+const t = es.guestEntry;
 
-export function TeamGateScreen({ action }: { action: TeamGateAction }) {
+export function GuestEntryScreen({ action }: { action: GuestEntryAction }) {
   const [state, formAction, pending] = useActionState(action, { error: null });
   return (
     <Screen>

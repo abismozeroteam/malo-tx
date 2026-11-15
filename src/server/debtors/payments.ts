@@ -86,8 +86,10 @@ export async function markPaid(db: Database, debtorId: string, paidCents: number
 type PaymentRefs = { id: string; qr_id: string | null; push_transaction_id: string | null };
 
 export async function markPaidFromPey(db: Database, pey: PeyCharges, refs: PaymentRefs, demoMode: boolean) {
-  const push = refs.push_transaction_id ? [await pey.transaction(refs.push_transaction_id)] : [];
-  const qr = refs.qr_id ? (await pey.qrTransactions(refs.qr_id)).items : [];
+  const [push, qr] = await Promise.all([
+    refs.push_transaction_id ? pey.transaction(refs.push_transaction_id).then((t) => [t]) : [],
+    refs.qr_id ? pey.qrTransactions(refs.qr_id).then((r) => r.items) : [],
+  ]);
   const paid = [...push, ...qr].find((t) => t.status === "PAID");
   if (!paid) return false;
   return markPaid(db, refs.id, pesosToCents(paid.amount), peyDate(paid.datePaid), demoMode);

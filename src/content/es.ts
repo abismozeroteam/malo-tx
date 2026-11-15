@@ -2,7 +2,7 @@ import type { ActionError, CatalogMemeKey } from "@/contracts/common";
 import type { DebtFormError } from "@/contracts/debt-form";
 import type { DebtSummaryStatus, DashboardFilter } from "@/contracts/dashboard";
 import type { SignInCodeError } from "@/contracts/sign-in";
-import type { TeamGateError } from "@/contracts/team-gate";
+import type { GuestEntryError } from "@/contracts/guest-entry";
 import { LIMITS } from "@/contracts/debt-form-rules";
 import { COUNTRY_CODE } from "@/contracts/phone";
 
@@ -81,7 +81,7 @@ export const es = {
     doneHint: "Te llevamos a tus cobros.",
   },
 
-  teamGate: {
+  guestEntry: {
     title: "Entra a cobrar",
     lead: "Solo dinos tu nombre. Tu sesión se cierra cuando cierras el navegador.",
     nameLabel: "Tu nombre",
@@ -90,7 +90,7 @@ export const es = {
     error: {
       invalid_name: `Escribe tu nombre, hasta ${LIMITS.firstName} letras.`,
       rate_limited: common.rateLimited,
-    } satisfies Record<TeamGateError, string>,
+    } satisfies Record<GuestEntryError, string>,
   },
 
   dashboard: {
@@ -124,7 +124,6 @@ export const es = {
 
   debtForm: {
     title: { what: "Nuevo cobro", who: "¿A quién le cobras?", style: "Hazlo tuyo" },
-    cancel: "Cancelar",
     back: "Atrás",
     kicker: "CREAR COBRO",
     stepOf: (n: number) => `${n} de 3`,
@@ -198,7 +197,6 @@ export const es = {
     share: "Mandárselo por WhatsApp",
     copy: "Copiar enlace",
     copied: "Copiado",
-    downloadQr: "Descargar QR",
     qrHint: "Este QR abre el enlace del cobro, no cobra solo.",
     createAnother: "Crear otro cobro",
     shareText: (name: string, url: string) => `${name}, tienes un cobro pendiente conmigo: ${url}`,
@@ -279,7 +277,8 @@ export const es = {
     lead: "Cada pantalla en cada estado, con datos de prueba. Solo existe en desarrollo.",
     sections: {
       landing: "Landing",
-      signIn: "Entrar",
+      guestEntry: "Entrar (invitado)",
+      signIn: "Entrar con WhatsApp (no publicado)",
       dashboard: "Mis cobros",
       debtForm: "Crear cobro",
       created: "Cobro listo",

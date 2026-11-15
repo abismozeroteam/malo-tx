@@ -6,7 +6,7 @@ const HOUR = 3600;
 const DAY = 86_400;
 
 export const RATE_LIMITS = {
-  gatePerIp: { max: 10, seconds: 600 },
+  signInsPerIp: { max: 10, seconds: 600 },
   debtsPerUser: { max: 30, seconds: HOUR },
   debtsPerIp: { max: 60, seconds: HOUR },
   qrPerLink: { max: 30, seconds: HOUR },

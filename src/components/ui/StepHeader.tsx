@@ -2,7 +2,7 @@ import { es } from "@/content/es";
 import { cx } from "./cx";
 import { Icon } from "./Icon";
 
-export function StepHeader({ title, step, onBack, onCancel }: { title: string; step: 1 | 2 | 3; onBack?: () => void; onCancel?: () => void }) {
+export function StepHeader({ title, step, onBack }: { title: string; step: 1 | 2 | 3; onBack?: () => void }) {
   return (
     <header className="flex w-full flex-col gap-4">
       <div className="flex items-center gap-4">
@@ -10,11 +10,6 @@ export function StepHeader({ title, step, onBack, onCancel }: { title: string; s
           <Icon name="back" className="size-6" />
         </button>
         <p className="flex-1 text-lead font-semibold text-ink">{title}</p>
-        {onCancel && (
-          <button type="button" onClick={onCancel} className="text-body font-semibold text-muted">
-            {es.debtForm.cancel}
-          </button>
-        )}
       </div>
       <div className="flex items-center justify-between text-caption font-semibold text-brand-ink">
         <span>{es.debtForm.kicker}</span>

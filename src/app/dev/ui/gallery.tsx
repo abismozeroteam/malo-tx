@@ -6,6 +6,7 @@ import { CreatedScreen } from "@/components/screens/CreatedScreen";
 import { DashboardScreen } from "@/components/screens/DashboardScreen";
 import { DebtFormScreen } from "@/components/screens/DebtFormScreen";
 import { DebtorScreen } from "@/components/screens/DebtorScreen";
+import { GuestEntryScreen } from "@/components/screens/GuestEntryScreen";
 import { LandingScreen } from "@/components/screens/LandingScreen";
 import { SignInScreen } from "@/components/screens/SignInScreen";
 import { PageHeading } from "@/components/ui/PageHeading";
@@ -22,6 +23,7 @@ const entries = <T,>(fixtures: Record<string, T>, render: (data: T) => ReactNode
 
 const sections: { title: string; entries: [string, () => ReactNode][] }[] = [
   { title: titles.landing, entries: [[titles.landing, () => <LandingScreen />]] },
+  { title: titles.guestEntry, entries: [[titles.guestEntry, () => <GuestEntryScreen action={async () => ({ error: null })} />]] },
   { title: titles.signIn, entries: entries(signInFixtures, (data) => <SignInScreen data={data} actions={signInActionsFixture} />) },
   { title: titles.dashboard, entries: entries(dashboardFixtures, (data) => <DashboardScreen data={data} actions={dashboardActionsFixture} />) },
   {

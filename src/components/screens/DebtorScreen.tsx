@@ -313,20 +313,20 @@ function useRefreshWhenPaid(checkPaid: DebtorPageActions["checkPaid"], active: b
   useEffect(() => {
     if (!active) return;
     let timer: ReturnType<typeof setTimeout>;
-    let startedAt = Date.now();
+    const stopAt = Date.now() + STOP_AFTER_MS;
+    let fastUntil = Date.now() + FAST_FOR_MS;
     let peyCheckedAt = Date.now();
     const tick = async () => {
-      const elapsed = Date.now() - startedAt;
-      if (document.hidden || elapsed > STOP_AFTER_MS) return;
+      if (document.hidden || Date.now() > stopAt) return;
       const askPey = Date.now() - peyCheckedAt >= PEY_CHECK_SECONDS * 1000;
       if (askPey) peyCheckedAt = Date.now();
       if (await checkPaid(askPey)) return router.refresh();
-      timer = setTimeout(tick, elapsed < FAST_FOR_MS ? FAST_POLL_MS : SLOW_POLL_MS);
+      timer = setTimeout(tick, Date.now() < fastUntil ? FAST_POLL_MS : SLOW_POLL_MS);
     };
     const restart = () => {
       if (document.hidden) return;
       clearTimeout(timer);
-      startedAt = Date.now();
+      fastUntil = Date.now() + FAST_FOR_MS;
       void tick();
     };
     timer = setTimeout(tick, FAST_POLL_MS);
