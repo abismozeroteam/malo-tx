@@ -15,4 +15,6 @@ export const chargeAmountCents = (amountCents: number, demoMode: boolean) => (de
 
 export const centsToPesos = (cents: number) => cents / 100;
 
+export const peyDate = (seconds?: number) => (seconds ? new Date(seconds * 1000) : null);
+
 export const pesosToCents = (pesos: number) => Math.round(pesos * 100);

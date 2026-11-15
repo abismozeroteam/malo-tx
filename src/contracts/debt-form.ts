@@ -69,6 +69,8 @@ export type DebtFormActions = {
   ): Promise<{ ok: true; debt: CreatedDebt } | { ok: false; errors: DebtFormErrors } | { ok: false; error: ActionError }>;
 };
 
+export const EMPTY_PERSON: DebtFormPerson = { firstName: "", phone: "", customCents: null };
+
 export const EMPTY_DEBT_FORM: DebtFormValues = {
   name: "",
   description: "",
@@ -76,7 +78,7 @@ export const EMPTY_DEBT_FORM: DebtFormValues = {
   totalCents: null,
   meme: { kind: "catalog", key: DEFAULT_MEME_KEY },
   caption: "",
-  people: [{ firstName: "", phone: "", customCents: null }],
+  people: [EMPTY_PERSON],
   split: "equal",
   includeMe: false,
   myCustomCents: null,

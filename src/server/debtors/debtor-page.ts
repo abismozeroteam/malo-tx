@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import type { CatalogMemeKey } from "@/contracts/common";
-import { OPEN_DEBTOR_STATUSES, type DebtorPageData, type DebtorStatus } from "@/contracts/debtor-page";
+import { isTokenShape, OPEN_DEBTOR_STATUSES, type DebtorPageData, type DebtorStatus } from "@/contracts/debtor-page";
 import { todayInMexicoCity } from "@/content/format";
 import { catalogMemeView } from "@/content/memes";
 import { db, type Database } from "../db";
@@ -28,7 +28,7 @@ export type DebtorRow = {
 };
 
 export async function findDebtor(db: Database, token: string): Promise<DebtorRow | null> {
-  if (token.length > 64) return null;
+  if (!isTokenShape(token)) return null;
   const [row] = await db.query<DebtorRow>(
     `SELECT p.id, p.token, p.first_name, p.amount_cents, p.status,
             to_char(p.qr_expires_at AT TIME ZONE 'UTC', ${ISO}) AS qr_expires_at,
@@ -48,7 +48,7 @@ export const loadDebtor = cache((token: string) => findDebtor(db(), token));
 export const isOpen = (row: DebtorRow) => !row.deleted && (OPEN_DEBTOR_STATUSES as readonly DebtorStatus[]).includes(row.status);
 
 export async function findOpenDebtor(db: Database, token: unknown): Promise<DebtorRow | null> {
-  if (typeof token !== "string") return null;
+  if (!isTokenShape(token)) return null;
   const row = await findDebtor(db, token);
   return row && isOpen(row) ? row : null;
 }

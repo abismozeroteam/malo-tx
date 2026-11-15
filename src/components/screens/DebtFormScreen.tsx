@@ -5,6 +5,7 @@ import { PICKABLE_MEMES, type ActionError, type MemeView } from "@/contracts/com
 import {
   memeChoiceId,
   toMemeView,
+  EMPTY_PERSON,
   type CreatedDebt,
   type DebtFormActions,
   type DebtFormData,
@@ -197,7 +198,7 @@ function WhoStep({ values, errors, creditorName, update, onNext }: StepProps & {
 
   const setPerson = (index: number, patch: Partial<DebtFormValues["people"][number]>) =>
     update({ people: values.people.map((p, i) => (i === index ? { ...p, ...patch } : p)) });
-  const addPerson = () => update({ people: [...values.people, { firstName: "", phone: "", customCents: null }] });
+  const addPerson = () => update({ people: [...values.people, EMPTY_PERSON] });
   const removePerson = (index: number) => update({ people: values.people.filter((_, i) => i !== index) });
 
   return (

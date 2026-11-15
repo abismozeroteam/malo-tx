@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { DashboardActions, DashboardData, DashboardFilter, DebtCard as DebtCardData } from "@/contracts/dashboard";
+import { LIMITS } from "@/contracts/debt-form-rules";
 import { routes } from "@/contracts/routes";
 import { catalogMemeView } from "@/content/memes";
 import { es } from "@/content/es";
@@ -124,7 +125,7 @@ function Greeting({ name, startEditing, rename }: { name: string; startEditing: 
             aria-label={t.editName}
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            maxLength={30}
+            maxLength={LIMITS.firstName}
             autoFocus
             className="heading min-w-0 flex-1 rounded-control border border-line bg-surface px-3 py-2 text-heading-md"
           />

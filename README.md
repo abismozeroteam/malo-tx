@@ -25,7 +25,7 @@ $0.01 MXN.
    responder una vez "Ya te pagué" o "No debo esto".
 5. pey avisa del pago con un webhook firmado y la página de quien debe cambia
    sola a "Cobrado." en segundos. Si el aviso tarda, la página le pregunta a
-   pey por los pagos del QR.
+   pey cada 30 segundos por el pago, del QR o de la solicitud.
 
 ## Memes
 
@@ -80,19 +80,21 @@ Ver `.env.example`. Ningún valor real va en el repositorio.
 Producción vive en https://malotx.app. Los enlaces de cobro, el canonical y el
 sitemap usan el dominio de producción que Vercel pone en
 `VERCEL_PROJECT_PRODUCTION_URL` (también en previews); en local usan
-`http://localhost:3000`. `malo-tx.vercel.app` redirige todo a `malotx.app`. El
-webhook de pey apunta a `https://malotx.app/api/webhooks/pey`.
+`http://localhost:3000`. `malo-tx.vercel.app` redirige todo a `malotx.app`
+(308, configurado en los dominios del proyecto en Vercel). El webhook de pey
+apunta a `https://malotx.app/api/webhooks/pey`.
 
 ## Seguridad
 
 - Un cobro solo se marca pagado con un webhook de pey con firma válida o con la
-  consulta a pey de los pagos del QR, nunca por algo que mande el navegador.
+  consulta a pey del pago (QR o solicitud), nunca por algo que mande el
+  navegador.
   Un pago por CoDi gana sobre "Ya te pagué" y "No debo esto".
-- Cada webhook se procesa una sola vez.
+- Cada webhook se guarda una sola vez; si pey lo repite, nada cambia dos veces.
 - Cada persona recibe un enlace propio con un token aleatorio de 128 bits.
 - Para la demo se entra solo con un nombre. La sesión termina al cerrar el
-  navegador y caduca a las 12 horas; las sesiones guardan solo el hash del token. Entrar y crear cobros tienen
-  límite por IP, y crear cobros también por usuario.
+  navegador y caduca a las 12 horas; se guarda solo el hash del token. Entrar
+  y crear cobros tienen límite por IP, y crear cobros también por usuario.
 - La página que abre quien debe solo muestra su nombre de pila; nunca
   teléfonos ni cuentas bancarias. Las páginas privadas (enlaces de cobro,
   `/cobros`, `/entrar`) no aparecen en buscadores.
@@ -101,6 +103,6 @@ webhook de pey apunta a `https://malotx.app/api/webhooks/pey`.
   QR ni solicitudes.
 - El número que se escribe para la solicitud al banco solo se manda a pey; no
   se guarda.
-- Pedir QR, mandar solicitudes, responder y consultar a pey tienen límite por enlace y por IP
-  (`RATE_LIMITS` en `src/server/rate-limit.ts`).
+- Pedir QR, mandar solicitudes, responder y consultar a pey tienen límites por
+  enlace o por IP (`RATE_LIMITS` en `src/server/rate-limit.ts`).
 - Cada commit y el historial completo pasan por un escáner de secretos.

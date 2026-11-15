@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import type { ActionResult } from "@/contracts/common";
-import type { DebtorAnswer, QrResult } from "@/contracts/debtor-page";
+import { isTokenShape, type DebtorAnswer, type QrResult } from "@/contracts/debtor-page";
 import { db } from "../db";
 import { findOpenDebtor } from "../debtors/debtor-page";
 import { answer, ensureQr, markPaidFromPey, paymentStatus, peyCharges, sendPush } from "../debtors/payments";
@@ -67,7 +67,7 @@ export async function reportAction(): Promise<ActionResult> {
 }
 
 export async function checkPaidAction(token: unknown, askPey: unknown): Promise<boolean> {
-  if (typeof token !== "string" || token.length > 64) return false;
+  if (!isTokenShape(token)) return false;
   const row = await paymentStatus(db(), token);
   if (!row || row.status === "cancelled") return false;
   if (row.status === "paid") return true;
