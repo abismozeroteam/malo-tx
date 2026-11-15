@@ -8,26 +8,26 @@ describe("consume", () => {
   it("allows up to the limit per key", async () => {
     const db = await createTestDb();
     const results = [];
-    for (let i = 0; i < 4; i++) results.push(await consume(db, [{ key: "k", max: 3 }], 60, now));
+    for (let i = 0; i < 4; i++) results.push(await consume(db, [{ key: "k", max: 3, seconds: 60 }], now));
     expect(results).toEqual([true, true, true, false]);
-    expect(await consume(db, [{ key: "other", max: 3 }], 60, now)).toBe(true);
+    expect(await consume(db, [{ key: "other", max: 3, seconds: 60 }], now)).toBe(true);
   });
 
   it("fails when any of several limits is spent", async () => {
     const db = await createTestDb();
     const limits = [
-      { key: "user", max: 5 },
-      { key: "ip", max: 1 },
+      { key: "user", max: 5, seconds: 60 },
+      { key: "ip", max: 1, seconds: 3600 },
     ];
-    expect(await consume(db, limits, 60, now)).toBe(true);
-    expect(await consume(db, limits, 60, now)).toBe(false);
+    expect(await consume(db, limits, now)).toBe(true);
+    expect(await consume(db, limits, now)).toBe(false);
   });
 
   it("starts over in the next window and prunes old rows", async () => {
     const db = await createTestDb();
-    await consume(db, [{ key: "k", max: 1 }], 60, now);
+    await consume(db, [{ key: "k", max: 1, seconds: 60 }], now);
     await db.query("UPDATE rate_limits SET expires_at = now() - interval '1 second'");
-    expect(await consume(db, [{ key: "k", max: 1 }], 60, now + 60_000)).toBe(true);
+    expect(await consume(db, [{ key: "k", max: 1, seconds: 60 }], now + 60_000)).toBe(true);
     expect(await db.query("SELECT key FROM rate_limits")).toHaveLength(1);
   });
 });

@@ -1,25 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb } from "../../../test/db";
-import { EMPTY_DEBT_FORM } from "@/contracts/debt-form";
+import { seedDebt } from "../../../test/debts";
 import type { Database } from "../db";
-import { signUp } from "../auth/session";
-import { createDebt } from "../debts/create-debt";
-import type { ValidDebtForm } from "../validation/debt-form";
-import { findDebtor, toDebtorPage } from "./debtor-page";
-import { answer, ensureQr, sendPush, type PeyCharges } from "./payments";
 import type { Phone } from "../validation/phone";
-
-const values: ValidDebtForm = {
-  ...EMPTY_DEBT_FORM,
-  meme: { kind: "catalog", key: "b" },
-  name: "Tacos",
-  dueDate: "2026-11-10",
-  totalCents: 30_000,
-  people: [
-    { firstName: "Ana", phone: "", customCents: null },
-    { firstName: "Beto", phone: "", customCents: null },
-  ],
-};
+import { findDebtor, findOpenDebtor, toDebtorPage } from "./debtor-page";
+import { answer, ensureQr, qrImage, sendPush, type PeyCharges } from "./payments";
 
 const now = new Date("2026-11-15T15:00:00Z");
 
@@ -36,14 +21,11 @@ describe("debtor page", () => {
 
   beforeEach(async () => {
     db = await createTestDb();
-    const owner = (await signUp(db, "Pam")).userId;
-    const debt = await createDebt(db, owner, values, "https://malo.test");
-    token = debt.links[0].url.split("/c/")[1];
+    token = (await seedDebt(db, { dueDate: "2026-11-10" })).tokens[0];
   });
 
   it("shows the debtor's share, the creditor and an overdue tag", async () => {
-    const data = toDebtorPage(await findDebtor(db, token), true, now);
-    expect(data).toMatchObject({
+    expect(toDebtorPage(await findDebtor(db, token), true, now)).toMatchObject({
       state: "open",
       status: "pending",
       debtorName: "Ana",
@@ -63,14 +45,14 @@ describe("debtor page", () => {
     expect(toDebtorPage(await findDebtor(db, token), true)).toEqual({ state: "gone" });
   });
 
-  it("creates one QR, charges $0.01 in demo mode with the debtor id, and reuses it", async () => {
+  it("creates one QR with the debtor id, charges $0.01 in demo mode, and reuses it", async () => {
     const pey = fakePey();
-    const row = (await findDebtor(db, token))!;
+    const row = (await findOpenDebtor(db, token))!;
     const qr = await ensureQr(db, pey, row, true, now);
-    expect(qr).toEqual({ imageSrc: "data:image/png;base64,iVBORw0KGgo=", expiresAt: "2026-11-15T15:10:00.000Z" });
+    expect(qr).toEqual({ imageSrc: `/c/${token}/qr?v=${Date.parse("2026-11-15T15:10:00Z")}`, expiresAt: "2026-11-15T15:10:00.000Z" });
     expect(pey.createQr).toHaveBeenCalledWith(expect.objectContaining({ amountCents: 1, expirationSeconds: 600, metadata: { debtorId: row.id } }));
 
-    const again = await ensureQr(db, pey, (await findDebtor(db, token))!, true, new Date(now.getTime() + 60_000));
+    const again = await ensureQr(db, pey, (await findOpenDebtor(db, token))!, true, new Date(now.getTime() + 60_000));
     expect(again).toEqual(qr);
     expect(pey.createQr).toHaveBeenCalledTimes(1);
     expect(toDebtorPage(await findDebtor(db, token), true, now)).toMatchObject({ qr });
@@ -78,23 +60,32 @@ describe("debtor page", () => {
 
   it("charges the real amount outside demo mode", async () => {
     const pey = fakePey();
-    await ensureQr(db, pey, (await findDebtor(db, token))!, false, now);
+    await ensureQr(db, pey, (await findOpenDebtor(db, token))!, false, now);
     expect(pey.createQr).toHaveBeenCalledWith(expect.objectContaining({ amountCents: 15_000 }));
   });
 
-  it("never charges a paid debtor", async () => {
+  it("sends a push without storing the phone", async () => {
     const pey = fakePey();
+    await sendPush(pey, (await findOpenDebtor(db, token))!, "5512345678" as Phone, true);
+    expect(pey.createPush).toHaveBeenCalledWith(expect.objectContaining({ phoneNumber: "5512345678", amountCents: 1 }));
+    expect(await db.query("SELECT 1 FROM debtors WHERE phone = '5512345678'")).toEqual([]);
+  });
+
+  it("serves the QR image only while it is valid", async () => {
+    await ensureQr(db, fakePey(), (await findOpenDebtor(db, token))!, true);
+    expect(await qrImage(db, token)).toEqual(Buffer.from("iVBORw0KGgo=", "base64"));
+    await db.query("UPDATE debtors SET qr_expires_at = now() - interval '1 second'");
+    expect(await qrImage(db, token)).toBeNull();
+  });
+
+  it("treats paid links as closed", async () => {
     await db.query("UPDATE debtors SET status = 'paid', paid_at = now()");
-    const row = (await findDebtor(db, token))!;
-    expect(await ensureQr(db, pey, row, true, now)).toBeNull();
-    expect(await sendPush(pey, row, "5512345678" as Phone, true)).toBe(false);
-    expect(pey.createQr).not.toHaveBeenCalled();
-    expect(pey.createPush).not.toHaveBeenCalled();
-    expect(toDebtorPage(row, true)).toMatchObject({ state: "paid" });
+    expect(await findOpenDebtor(db, token)).toBeNull();
+    expect(toDebtorPage(await findDebtor(db, token), true)).toMatchObject({ state: "paid" });
   });
 
   it("lets the debtor answer once", async () => {
-    const row = (await findDebtor(db, token))!;
+    const row = (await findOpenDebtor(db, token))!;
     expect(await answer(db, row.id, "claims_paid")).toBe(true);
     expect(await answer(db, row.id, "disputed")).toBe(false);
     expect(toDebtorPage(await findDebtor(db, token), true, now)).toMatchObject({ status: "claims_paid", canAnswer: false });
