@@ -51,7 +51,7 @@ export const createdDebtFixture: CreatedDebt = {
   dueDate: filled.dueDate || null,
   meme: finalMemeView(filled.meme!, filled.caption),
   links: [
-    { firstName: "Ana", amountCents: 45000, url: "https://malo-tx.vercel.app/c/ejemplo-ana", whatsappUrl: "https://wa.me/525523456789" },
-    { firstName: "Pedro", amountCents: 45000, url: "https://malo-tx.vercel.app/c/ejemplo-pedro", whatsappUrl: "https://wa.me/" },
+    { firstName: "Ana", amountCents: 45000, url: "https://malotx.app/c/ejemplo-ana", whatsappUrl: "https://wa.me/525523456789" },
+    { firstName: "Pedro", amountCents: 45000, url: "https://malotx.app/c/ejemplo-pedro", whatsappUrl: "https://wa.me/" },
   ],
 };

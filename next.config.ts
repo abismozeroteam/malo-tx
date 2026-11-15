@@ -45,10 +45,10 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
-      {
-        source: "/dev/:path*",
+      ...["/dev/:path*", "/c/:path*", "/cobros/:path*", "/entrar"].map((source) => ({
+        source,
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
-      },
+      })),
     ];
   },
 };
