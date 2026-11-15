@@ -1,5 +1,5 @@
 import type { DashboardData } from "@/contracts/dashboard";
-import { es } from "@/content/es";
+import { catalogMemeView } from "@/content/memes";
 
 export const dashboardFixtures: Record<string, DashboardData> = {
   "sin cobros": { userName: "María", suggestRename: false, owedCents: 0, receivedCents: 0, debts: [] },
@@ -13,7 +13,7 @@ export const dashboardFixtures: Record<string, DashboardData> = {
       {
         href: "#cena",
         name: "Cena del viernes",
-        meme: { kind: "catalog", key: "a", caption: es.memes.defaultCaption.a },
+        meme: catalogMemeView("a"),
         peopleCount: 3,
         paidCount: 1,
         onlyDebtorName: null,
@@ -24,7 +24,7 @@ export const dashboardFixtures: Record<string, DashboardData> = {
       {
         href: "#renta",
         name: "Renta de noviembre",
-        meme: { kind: "catalog", key: "d", caption: es.memes.defaultCaption.d },
+        meme: catalogMemeView("d"),
         peopleCount: 1,
         paidCount: 0,
         onlyDebtorName: "Carlos",
@@ -35,7 +35,7 @@ export const dashboardFixtures: Record<string, DashboardData> = {
       {
         href: "#concierto",
         name: "Entradas al concierto",
-        meme: { kind: "catalog", key: "c", caption: es.memes.defaultCaption.c },
+        meme: catalogMemeView("c"),
         peopleCount: 1,
         paidCount: 1,
         onlyDebtorName: "Lucía",

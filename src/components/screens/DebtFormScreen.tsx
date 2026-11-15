@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { ActionError } from "@/contracts/common";
+import { PICKABLE_MEMES, type ActionError, type MemeView } from "@/contracts/common";
 import {
   memeChoiceId,
   toMemeView,
@@ -26,7 +26,7 @@ import {
 } from "@/contracts/debt-form-rules";
 import { routes } from "@/contracts/routes";
 import { es } from "@/content/es";
-import { captionFor, defaultCaptionFor, MEME_CATALOG, PICKER_MEMES } from "@/content/memes";
+import { defaultCaptionFor, finalMemeView, MEME_CATALOG } from "@/content/memes";
 import { centsFromInput, centsToInput, formatMoney } from "@/content/format";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -123,7 +123,7 @@ function MoneyInput({
 
 function WhatStep({ values, errors, uploads, update, onNext }: StepProps & { uploads: DebtFormData["uploads"] }) {
   const pickedId = values.meme ? memeChoiceId(values.meme) : null;
-  const pick = (meme: MemeChoice) => update({ meme, caption: values.caption });
+  const pick = (meme: MemeChoice) => update({ meme });
 
   return (
     <>
@@ -157,7 +157,7 @@ function WhatStep({ values, errors, uploads, update, onNext }: StepProps & { upl
           </>
         )}
         <p className="text-small font-semibold text-muted">{t.what.catalog}</p>
-        <MemeGrid options={PICKER_MEMES.map(({ key }) => ({ kind: "catalog", key }))} pickedId={pickedId} onPick={pick} />
+        <MemeGrid options={PICKABLE_MEMES.map((key) => ({ kind: "catalog", key }))} pickedId={pickedId} onPick={pick} />
         {errors.meme && <p className="text-small text-danger-ink">{t.errors[errors.meme]}</p>}
       </fieldset>
 
@@ -322,7 +322,7 @@ function StyleStep({
       <PageHeading title={t.style.heading} lead={t.style.lead} />
       {values.meme && (
         <DebtPreview
-          meme={toMemeView(values.meme, captionFor(values.meme, values.caption))}
+          meme={finalMemeView(values.meme, values.caption)}
           name={values.name}
           rows={<ValueRow label={t.style.yourPart(values.people[0]?.firstName ?? "")} value={`${formatMoney(amounts[0] ?? 0)} ${es.common.currency}`} />}
         />
@@ -345,7 +345,7 @@ function StyleStep({
   );
 }
 
-export function DebtPreview({ meme, name, rows }: { meme: ReturnType<typeof toMemeView>; name: string; rows: React.ReactNode }) {
+export function DebtPreview({ meme, name, rows }: { meme: MemeView; name: string; rows: React.ReactNode }) {
   return (
     <Card tone="outlined" className="rounded-hero p-3">
       <MemeCard meme={meme} />

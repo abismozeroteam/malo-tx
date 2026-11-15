@@ -6,6 +6,10 @@ export const PICKABLE_MEMES = ["a", "b", "c", "d", "e"] as const;
 
 export type CatalogMemeKey = (typeof PICKABLE_MEMES)[number] | "paid";
 
+export const DEFAULT_MEME_KEY = "a" satisfies CatalogMemeKey;
+
+export type CaptionPosition = "top" | "bottom";
+
 export type MemeView =
   | { kind: "catalog"; key: CatalogMemeKey; caption: string }
   | { kind: "upload"; src: string; caption: string };

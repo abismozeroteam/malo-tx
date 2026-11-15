@@ -24,6 +24,14 @@ $0.01 MXN.
    solicitud en la app de su banco.
 5. pey confirma el pago y la página cambia a "Cobrado." en segundos.
 
+## Memes
+
+Seis chihuahuas en `public/memes` (WebP, 1200 × 1200, sin metadatos), definidos
+una sola vez en `src/content/memes.ts`: archivo, texto alternativo, texto por
+defecto y posición del texto. El texto va encima de la imagen en estilo meme y
+quien cobra lo puede cambiar (hasta 60 caracteres). La vista previa del enlace
+se genera en el servidor con el meme y su texto.
+
 ## Stack
 
 - Next.js (App Router), TypeScript y Tailwind CSS, en Vercel.

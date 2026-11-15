@@ -1,3 +1,4 @@
+import { DEFAULT_MEME_KEY } from "@/contracts/common";
 import { routes } from "@/contracts/routes";
 import { es } from "@/content/es";
 import { catalogMemeView } from "@/content/memes";
@@ -12,7 +13,7 @@ export function LandingScreen() {
   return (
     <Screen>
       <Wordmark className="self-center" />
-      <MemeCard meme={catalogMemeView("a")} preload />
+      <MemeCard meme={catalogMemeView(DEFAULT_MEME_KEY)} important />
       <h1 className="text-title font-bold leading-heading">{t.headline}</h1>
       <p className="text-lead leading-ui">{t.lead}</p>
       <ul className="flex flex-col gap-2 text-body leading-ui text-muted">

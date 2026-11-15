@@ -3,35 +3,32 @@ import type { MemeView } from "@/contracts/common";
 import { resolveMeme } from "@/content/memes";
 import { cx } from "./cx";
 
-type Size = "hero" | "banner" | "tile" | "thumb";
+type Size = "hero" | "tile" | "thumb";
 
 const frames: Record<Size, string> = {
   hero: "h-75 w-full rounded-hero",
-  banner: "h-30 w-full rounded-button",
   tile: "aspect-square w-full rounded-small",
   thumb: "size-12 rounded-small",
 };
 
 const imageSizes: Record<Size, string> = {
   hero: "(max-width: 430px) 100vw, 430px",
-  banner: "(max-width: 430px) 100vw, 430px",
   tile: "140px",
   thumb: "48px",
 };
 
 const captionText: Record<Size, string | null> = {
   hero: "text-meme px-4.5 py-5",
-  banner: "text-lead px-3 py-3",
   tile: null,
   thumb: null,
 };
 
-export function MemeCard({ meme, size = "hero", preload = false }: { meme: MemeView; size?: Size; preload?: boolean }) {
+export function MemeCard({ meme, size = "hero", important = false }: { meme: MemeView; size?: Size; important?: boolean }) {
   const { src, alt, captionPosition } = resolveMeme(meme);
   const caption = captionText[size];
   return (
     <figure className={cx("relative shrink-0 overflow-hidden bg-neutral-soft", frames[size])}>
-      <Image src={src} alt={alt} fill sizes={imageSizes[size]} preload={preload} className="object-cover" />
+      <Image src={src} alt={alt} fill sizes={imageSizes[size]} fetchPriority={important ? "high" : "auto"} loading={important ? "eager" : "lazy"} className="object-cover" />
       {caption && meme.caption && (
         <figcaption
           className={cx(

@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   poweredByHeader: false,
   agentRules: false,
+  images: {
+    deviceSizes: [640, 828, 1200],
+    imageSizes: [48, 96, 256, 384],
+    qualities: [75],
+    minimumCacheTTL: 2678400,
+  },
   turbopack: {
     rules: {
       "*.css": {

@@ -1,54 +1,42 @@
-import { PICKABLE_MEMES, type CatalogMemeKey, type MemeView } from "@/contracts/common";
-import type { MemeChoice } from "@/contracts/debt-form";
+import { DEFAULT_MEME_KEY, type CaptionPosition, type CatalogMemeKey, type MemeView } from "@/contracts/common";
+import { toMemeView, type MemeChoice } from "@/contracts/debt-form";
+import type { DebtorPageData } from "@/contracts/debtor-page";
 import { es } from "./es";
 
-export type CaptionPosition = "top" | "bottom";
+export type CatalogMeme = { src: string; alt: string; defaultCaption: string; captionPosition: CaptionPosition };
 
-export type CatalogMeme = {
-  key: CatalogMemeKey;
-  src: string;
-  alt: string;
-  defaultCaption: string;
-  captionPosition: CaptionPosition;
-};
-
-const positions: Record<CatalogMemeKey, CaptionPosition> = {
-  a: "top",
-  b: "bottom",
-  c: "bottom",
-  d: "top",
-  e: "top",
-  paid: "top",
-};
-
-const entry = (key: CatalogMemeKey): CatalogMeme => ({
-  key,
-  src: `/memes/${key}.jpg`,
+const entry = (key: CatalogMemeKey, captionPosition: CaptionPosition): CatalogMeme => ({
+  src: `/memes/${key}.webp`,
   alt: es.memes.alt[key],
   defaultCaption: es.memes.defaultCaption[key],
-  captionPosition: positions[key],
+  captionPosition,
 });
 
-export const MEME_CATALOG = Object.fromEntries(
-  ([...PICKABLE_MEMES, "paid"] as CatalogMemeKey[]).map((key) => [key, entry(key)]),
-) as Record<CatalogMemeKey, CatalogMeme>;
+export const MEME_CATALOG = {
+  a: entry("a", "top"),
+  b: entry("b", "bottom"),
+  c: entry("c", "bottom"),
+  d: entry("d", "top"),
+  e: entry("e", "top"),
+  paid: entry("paid", "top"),
+} satisfies Record<CatalogMemeKey, CatalogMeme>;
 
-export const PICKER_MEMES = PICKABLE_MEMES.map((key) => MEME_CATALOG[key]);
+export const REPORTED_FALLBACK_KEY = DEFAULT_MEME_KEY;
 
-export const DEFAULT_MEME = MEME_CATALOG.a;
-
-export const catalogMemeView = (key: CatalogMemeKey, caption = MEME_CATALOG[key].defaultCaption): MemeView => ({
-  kind: "catalog",
-  key,
-  caption,
-});
-
-export function resolveMeme(meme: MemeView) {
-  if (meme.kind === "upload") return { src: meme.src, alt: es.memes.uploadAlt, captionPosition: "bottom" as const };
-  const { src, alt, captionPosition } = MEME_CATALOG[meme.key];
-  return { src, alt, captionPosition };
-}
+export const catalogMemeView = (key: CatalogMemeKey, caption = MEME_CATALOG[key].defaultCaption): MemeView =>
+  toMemeView({ kind: "catalog", key }, caption);
 
 export const defaultCaptionFor = (meme: MemeChoice | null) => (meme?.kind === "catalog" ? MEME_CATALOG[meme.key].defaultCaption : "");
 
-export const captionFor = (meme: MemeChoice | null, caption: string) => caption.trim() || defaultCaptionFor(meme);
+export const finalMemeView = (meme: MemeChoice, caption: string) => toMemeView(meme, caption.trim() || defaultCaptionFor(meme));
+
+export function debtorPageMeme(data: DebtorPageData): MemeView {
+  if (data.state === "gone") return catalogMemeView("e", es.debtor.gone.caption);
+  if (data.state === "paid") return catalogMemeView("paid");
+  return data.meme;
+}
+
+export function resolveMeme(meme: MemeView): Omit<CatalogMeme, "defaultCaption"> {
+  if (meme.kind === "upload") return { src: meme.src, alt: es.memes.uploadAlt, captionPosition: "bottom" };
+  return MEME_CATALOG[meme.key];
+}

@@ -1,4 +1,4 @@
-import type { ActionError, CatalogMemeKey, Cents, IsoDate, MemeView } from "./common";
+import { DEFAULT_MEME_KEY, type ActionError, type CatalogMemeKey, type Cents, type IsoDate, type MemeView } from "./common";
 
 export type MemeChoice =
   | { kind: "catalog"; key: CatalogMemeKey }
@@ -73,7 +73,7 @@ export const EMPTY_DEBT_FORM: DebtFormValues = {
   description: "",
   dueDate: "",
   totalCents: null,
-  meme: { kind: "catalog", key: "a" },
+  meme: { kind: "catalog", key: DEFAULT_MEME_KEY },
   caption: "",
   people: [{ firstName: "", phone: "", customCents: null }],
   split: "equal",

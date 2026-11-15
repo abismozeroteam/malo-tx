@@ -1,5 +1,5 @@
-import { EMPTY_DEBT_FORM, toMemeView, type CreatedDebt, type DebtFormData, type DebtFormValues } from "@/contracts/debt-form";
-import { captionFor } from "@/content/memes";
+import { EMPTY_DEBT_FORM, type CreatedDebt, type DebtFormData, type DebtFormValues } from "@/contracts/debt-form";
+import { finalMemeView } from "@/content/memes";
 
 const filled: DebtFormValues = {
   ...EMPTY_DEBT_FORM,
@@ -48,7 +48,7 @@ export const createdDebtFixture: CreatedDebt = {
   name: filled.name,
   totalCents: filled.totalCents!,
   dueDate: filled.dueDate || null,
-  meme: toMemeView(filled.meme!, captionFor(filled.meme, filled.caption)),
+  meme: finalMemeView(filled.meme!, filled.caption),
   links: [
     { firstName: "Ana", amountCents: 45000, url: "https://malo-tx.vercel.app/c/ejemplo-ana", whatsappUrl: "https://wa.me/525523456789" },
     { firstName: "Pedro", amountCents: 45000, url: "https://malo-tx.vercel.app/c/ejemplo-pedro", whatsappUrl: "https://wa.me/" },

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { ActionError, ActionResult } from "@/contracts/common";
 import type { CodiQr, DebtorPageActions, DebtorPageData } from "@/contracts/debtor-page";
 import { routes } from "@/contracts/routes";
-import { catalogMemeView } from "@/content/memes";
+import { catalogMemeView, debtorPageMeme, REPORTED_FALLBACK_KEY } from "@/content/memes";
 import { es } from "@/content/es";
 import { formatDate, formatDateTime, formatMoney } from "@/content/format";
 import { Button, LinkButton } from "@/components/ui/Button";
@@ -46,7 +46,7 @@ function OpenView({ data, actions }: { data: OpenData; actions: DebtorPageAction
   const [error, setError] = useState<ActionError | null>(null);
   const qr = useFreshQr(data.qr, actions.requestQr);
 
-  const meme = reported ? catalogMemeView("a", data.meme.caption) : data.meme;
+  const meme = reported ? catalogMemeView(REPORTED_FALLBACK_KEY, data.meme.caption) : debtorPageMeme(data);
   const amount = formatMoney(data.amountCents);
 
   if (view === "push") {
@@ -70,7 +70,7 @@ function OpenView({ data, actions }: { data: OpenData; actions: DebtorPageAction
   return (
     <Screen>
       <Header demoMode={data.demoMode} banner={banner} />
-      <MemeCard meme={meme} preload />
+      <MemeCard meme={meme} important />
 
       {data.status === "pending" && (
         <>
@@ -253,7 +253,7 @@ function PaidView({ data }: { data: PaidData }) {
   return (
     <Screen>
       <Wordmark className="self-center" />
-      <MemeCard meme={catalogMemeView("paid")} preload />
+      <MemeCard meme={debtorPageMeme(data)} />
       <PageHeading size="hero" title={t.paid.heading} lead={t.paid.lead(data.debtorName, data.creditorName)} />
       <Card tone="outlined">
         <p className="flex items-center justify-between gap-3">
@@ -273,7 +273,7 @@ function GoneView() {
   return (
     <Screen>
       <Wordmark className="self-center" />
-      <MemeCard meme={catalogMemeView("e", t.gone.caption)} preload />
+      <MemeCard meme={debtorPageMeme({ state: "gone" })} />
       <PageHeading title={t.gone.heading} lead={t.gone.lead} />
       <LinkButton href={routes.home}>{t.ctaOwn}</LinkButton>
     </Screen>
