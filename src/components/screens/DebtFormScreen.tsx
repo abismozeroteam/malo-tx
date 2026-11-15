@@ -58,7 +58,6 @@ export function DebtFormScreen({ data, actions }: { data: DebtFormData; actions:
 
   const index = DEBT_FORM_STEPS.indexOf(step);
   const update: Update = (patch) => setValues((current) => ({ ...current, ...patch }));
-  const cancel = () => window.location.assign(routes.debts);
 
   function next() {
     const found = validateDebtForm(values, step);
@@ -85,8 +84,7 @@ export function DebtFormScreen({ data, actions }: { data: DebtFormData; actions:
       <StepHeader
         title={t.title[step]}
         step={(index + 1) as 1 | 2 | 3}
-        onBack={() => (index === 0 ? cancel() : setStep(DEBT_FORM_STEPS[index - 1]))}
-        onCancel={cancel}
+        onBack={() => (index === 0 ? window.location.assign(routes.home) : setStep(DEBT_FORM_STEPS[index - 1]))}
       />
       {step === "what" && <WhatStep values={values} errors={errors} uploads={data.uploads} update={update} onNext={next} />}
       {step === "who" && <WhoStep values={values} errors={errors} creditorName={data.creditorName} update={update} onNext={next} />}
