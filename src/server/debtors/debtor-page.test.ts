@@ -12,6 +12,7 @@ function fakePey() {
   return {
     createQr: vi.fn(async () => ({ id: "qr_1", qrString: "codi", qrImage: "iVBORw0KGgo=" })),
     createPush: vi.fn(async () => ({ transactionId: "tx_1", codiId: "c1" })),
+    qrTransactions: vi.fn(async () => ({ items: [] as Awaited<ReturnType<PeyCharges["qrTransactions"]>>["items"], nextToken: null })),
   } satisfies PeyCharges;
 }
 
@@ -93,17 +94,18 @@ describe("debtor page", () => {
 });
 
 describe("markPaidFromQr", () => {
-  it("marks paid when pey reports a paid transaction for the QR", async () => {
+  it("marks paid only when pey reports a paid transaction for the QR", async () => {
     const db = await createTestDb();
     const token = (await seedDebt(db)).tokens[0];
-    await ensureQr(db, fakePey(), (await findOpenDebtor(db, token))!, true);
-    const row = (await findOpenDebtor(db, token))!;
+    const { id } = (await findOpenDebtor(db, token))!;
+    const pey = fakePey();
 
-    const pending = async () => ({ items: [{ id: "t", status: "PENDING" as const, amount: 0.01 }], nextToken: null });
-    expect(await markPaidFromQr(db, pending, row, true)).toBe(false);
+    pey.qrTransactions.mockResolvedValueOnce({ items: [{ id: "t", status: "PENDING", amount: 0.01 }], nextToken: null });
+    expect(await markPaidFromQr(db, pey, id, "qr_1", true)).toBe(false);
 
-    const paid = async () => ({ items: [{ id: "t", status: "PAID" as const, amount: 0.01, datePaid: 1794760000 }], nextToken: null });
-    expect(await markPaidFromQr(db, paid, row, true)).toBe(true);
+    pey.qrTransactions.mockResolvedValueOnce({ items: [{ id: "t", status: "PAID", amount: 0.01, datePaid: 1794760000 }], nextToken: null });
+    expect(await markPaidFromQr(db, pey, id, "qr_1", true)).toBe(true);
+    expect(pey.qrTransactions).toHaveBeenCalledWith("qr_1");
     expect(toDebtorPage(await findDebtor(db, token), true)).toMatchObject({ state: "paid", paidAt: "2026-11-15T16:26:40.000Z" });
   });
 });

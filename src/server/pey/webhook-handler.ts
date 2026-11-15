@@ -1,7 +1,6 @@
-import { z } from "zod";
 import { pesosToCents } from "./charge-rules";
 import { verifyStandardWebhook } from "./standard-webhooks";
-import { isPaymentEvent, maskEvent, peyEventSchema, type PeyEvent } from "./webhook-event";
+import { debtorIdOf, isPaymentEvent, maskEvent, peyEventSchema, type PeyEvent } from "./webhook-event";
 
 export type StoredPeyEvent = {
   webhookId: string;
@@ -53,7 +52,7 @@ export async function handlePeyWebhook(input: {
     webhookId: verified.webhookId,
     eventType: event.type,
     transactionId: payment?.transactionId ?? null,
-    debtorId: z.uuid().safeParse(payment?.metadata?.externalMetadata?.debtorId).data ?? null,
+    debtorId: payment ? debtorIdOf(payment) : null,
     amountCents: payment ? pesosToCents(payment.amount) : null,
     datePaid: payment?.datePaid ? new Date(payment.datePaid * 1000) : null,
     payload: maskEvent(event),

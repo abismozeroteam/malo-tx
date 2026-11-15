@@ -28,9 +28,10 @@ describe("saveEvent", () => {
     debtorId = (await db.query<{ id: string }>("SELECT id FROM debtors ORDER BY position"))[0].id;
   });
 
-  it("marks the debtor paid when a demo payment arrives", async () => {
+  it("marks the debtor paid by CoDi when a demo payment arrives", async () => {
     expect(await saveEvent(db, event(), true)).toBe("stored");
     expect(await status(db)).toEqual({ status: "paid", paid: true });
+    expect(await db.query("SELECT settlement FROM debtors WHERE id = $1", [debtorId])).toEqual([{ settlement: "codi" }]);
   });
 
   it("wins over a claim or a dispute", async () => {
@@ -40,13 +41,24 @@ describe("saveEvent", () => {
   });
 
   it("does not mark paid when less than the charge arrives", async () => {
-    await saveEvent(db, event({ amountCents: 1 }), false);
+    await saveEvent(db, event(), false);
     expect((await status(db)).status).toBe("pending");
   });
 
-  it("does nothing on a repeated delivery or without a debtor", async () => {
+  it("does nothing without a debtor", async () => {
+    await saveEvent(db, event({ debtorId: null }), true);
+    expect((await status(db)).status).toBe("pending");
+  });
+
+  it("reports a repeated delivery and still settles the debtor", async () => {
     await saveEvent(db, event({ debtorId: null }), true);
     expect(await saveEvent(db, event(), true)).toBe("duplicate");
+    expect((await status(db)).status).toBe("paid");
+  });
+
+  it("ignores payments for deleted debts", async () => {
+    await db.query("UPDATE debts SET deleted_at = now()");
+    await saveEvent(db, event(), true);
     expect((await status(db)).status).toBe("pending");
   });
 

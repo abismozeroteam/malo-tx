@@ -202,7 +202,7 @@ export const es = {
     copied: "Copiado",
     downloadQr: "Descargar QR",
     qrHint: "Este QR abre el enlace del cobro, no cobra solo.",
-    toDashboard: "Crear otro cobro",
+    createAnother: "Crear otro cobro",
     shareText: (name: string, url: string) => `${name}, tienes un cobro pendiente conmigo: ${url}`,
   },
 

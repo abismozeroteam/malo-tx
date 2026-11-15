@@ -42,8 +42,8 @@ export function CreatedScreen({ debt, creditorName }: { debt: CreatedDebt; credi
           </li>
         ))}
       </ul>
-      <LinkButton href={routes.debts} variant="link" className="inline-flex items-center justify-center gap-1 text-body">
-        {t.toDashboard}
+      <LinkButton href={routes.newDebt} variant="link" className="inline-flex items-center justify-center gap-1 text-body">
+        {t.createAnother}
         <Icon name="forward" className="size-4" />
       </LinkButton>
     </Screen>

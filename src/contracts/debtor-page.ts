@@ -2,6 +2,8 @@ import type { ActionError, ActionResult, Cents, IsoDate, IsoDateTime, MemeView }
 
 export type DebtorStatus = "pending" | "claims_paid" | "disputed" | "paid" | "cancelled";
 
+export const OPEN_DEBTOR_STATUSES = ["pending", "claims_paid", "disputed"] as const satisfies DebtorStatus[];
+
 export type CodiQr = { imageSrc: string; expiresAt: IsoDateTime };
 
 export const QR_MIN_LEFT_MS = 60_000;
@@ -39,5 +41,5 @@ export type DebtorPageActions = {
   claimPaid(): Promise<ActionResult>;
   dispute(): Promise<ActionResult>;
   report(): Promise<ActionResult>;
-  checkPaid(): Promise<boolean>;
+  checkPaid(askPey: boolean): Promise<boolean>;
 };

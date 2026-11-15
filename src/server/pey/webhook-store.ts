@@ -1,10 +1,8 @@
 import "server-only";
 import { db, type Database } from "../db";
+import { demoChargeCents, markPaidSql } from "../debtors/payments";
 import { isDemoMode } from "../env";
-import { DEMO_MAX_CENTS } from "./charge-rules";
 import type { PeyEventStore, StoredPeyEvent } from "./webhook-handler";
-
-const OPEN = `('pending', 'claims_paid', 'disputed')`;
 
 export async function saveEvent(db: Database, event: StoredPeyEvent, demoMode: boolean): Promise<"stored" | "duplicate"> {
   const [row] = await db.query<{ stored: boolean }>(
@@ -13,12 +11,7 @@ export async function saveEvent(db: Database, event: StoredPeyEvent, demoMode: b
        VALUES ($1, $2, $3, $4, $5, $6)
        ON CONFLICT (webhook_id) DO NOTHING
        RETURNING id
-     ), paid AS (
-       UPDATE debtors SET status = 'paid', paid_at = coalesce($5, now()), updated_at = now()
-        WHERE id = $7::uuid AND status IN ${OPEN} AND EXISTS (SELECT 1 FROM stored)
-          AND $4 >= coalesce($8, amount_cents)
-       RETURNING id
-     )
+     ), paid AS (${markPaidSql({ id: "$7::uuid", paidCents: "$4", paidAt: "$5", demoCents: "$8" })})
      SELECT EXISTS (SELECT 1 FROM stored) AS stored`,
     [
       event.webhookId,
@@ -28,7 +21,7 @@ export async function saveEvent(db: Database, event: StoredPeyEvent, demoMode: b
       event.datePaid,
       JSON.stringify(event.payload),
       event.debtorId,
-      demoMode ? DEMO_MAX_CENTS : null,
+      demoChargeCents(demoMode),
     ],
   );
   return row.stored ? "stored" : "duplicate";
