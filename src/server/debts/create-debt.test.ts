@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestDb } from "../../../test/db";
-import { EMPTY_DEBT_FORM, type DebtFormValues } from "@/contracts/debt-form";
+import { EMPTY_DEBT_FORM } from "@/contracts/debt-form";
+import type { ValidDebtForm } from "../validation/debt-form";
 import type { Database } from "../db";
-import { createUser } from "../auth/session";
+import { signUp } from "../auth/session";
 import { createDebt, loadCreatedDebt, whatsappShareUrl } from "./create-debt";
 
-const values: DebtFormValues = {
+const values: ValidDebtForm = {
   ...EMPTY_DEBT_FORM,
+  meme: { kind: "catalog", key: "a" },
   name: " Tacos del viernes ",
   totalCents: 30_000,
   includeMe: true,
@@ -22,7 +24,7 @@ describe("createDebt", () => {
 
   beforeEach(async () => {
     db = await createTestDb();
-    creditorId = await createUser(db, "Eduardo");
+    creditorId = (await signUp(db, "Eduardo")).userId;
   });
 
   it("saves the debt and one debtor per person", async () => {
@@ -76,8 +78,8 @@ describe("whatsappShareUrl", () => {
 describe("loadCreatedDebt", () => {
   it("returns the creditor's own debt only", async () => {
     const db = await createTestDb();
-    const owner = await createUser(db, "Eduardo");
-    const stranger = await createUser(db, "Otro");
+    const owner = (await signUp(db, "Eduardo")).userId;
+    const stranger = (await signUp(db, "Otro")).userId;
     const created = await createDebt(db, owner, values, "https://malo.test");
 
     expect(await loadCreatedDebt(db, owner, created.ref, "https://malo.test")).toEqual(created);
@@ -86,7 +88,7 @@ describe("loadCreatedDebt", () => {
 
   it("keeps the due date as a plain date", async () => {
     const db = await createTestDb();
-    const owner = await createUser(db, "Eduardo");
+    const owner = (await signUp(db, "Eduardo")).userId;
     const created = await createDebt(db, owner, { ...values, dueDate: "2026-11-30" }, "https://malo.test");
     expect(created.dueDate).toBe("2026-11-30");
   });

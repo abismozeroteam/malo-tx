@@ -3,10 +3,12 @@ import type { DebtFormError } from "@/contracts/debt-form";
 import type { DebtSummaryStatus, DashboardFilter } from "@/contracts/dashboard";
 import type { SignInCodeError } from "@/contracts/sign-in";
 import type { TeamGateError } from "@/contracts/team-gate";
+import { LIMITS } from "@/contracts/debt-form-rules";
+import { COUNTRY_CODE } from "@/contracts/phone";
 
 const common = {
   currency: "MXN",
-  countryCode: "+52",
+  countryCode: `+${COUNTRY_CODE}`,
   phonePlaceholder: "55 1234 5678",
   invalidPhone: "El número debe tener 10 dígitos.",
   rateLimited: "Vas muy rápido. Espera un minuto e intenta otra vez.",
@@ -88,7 +90,7 @@ export const es = {
     submit: "Entrar",
     error: {
       wrong_secret: "Esa clave no es.",
-      invalid_name: "Escribe tu nombre, hasta 30 letras.",
+      invalid_name: `Escribe tu nombre, hasta ${LIMITS.firstName} letras.`,
       rate_limited: common.rateLimited,
     } satisfies Record<TeamGateError, string>,
   },

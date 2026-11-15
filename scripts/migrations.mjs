@@ -1,7 +1,10 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
-export async function readMigrations(dir = path.join(process.cwd(), "db", "migrations")) {
+const dir = path.join(process.cwd(), "db", "migrations");
+
+// The HTTP driver runs one statement per query.
+export async function readMigrations() {
   const files = (await readdir(dir)).filter((f) => f.endsWith(".sql")).sort();
   return Promise.all(
     files.map(async (name) => ({

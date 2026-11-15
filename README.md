@@ -49,14 +49,17 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Abre http://localhost:3000. La galería de pantallas con datos de prueba está en
-http://localhost:3000/dev/ui (solo en desarrollo).
+Con `DATABASE_URL` en `.env.local`, corre `npm run db:migrate` una vez. Abre
+http://localhost:3000/entrar y entra con el `TEAM_SECRET` de tu `.env.local`.
+La galería de pantallas con datos de prueba está en http://localhost:3000/dev/ui
+(solo en desarrollo).
 
 | Comando | Qué hace |
 |---|---|
 | `npm run dev` | Servidor local |
 | `npm run check` | Tipos y lint |
-| `npm test` | Pruebas unitarias |
+| `npm test` | Pruebas (con Postgres en memoria) |
+| `npm run db:migrate` | Aplica las migraciones a `DATABASE_URL` |
 | `npm run scan` | Busca secretos en el código |
 | `npm run build` | Pruebas, migraciones (solo en producción) y build |
 
@@ -72,13 +75,17 @@ Ver `.env.example`. Ningún valor real va en el repositorio.
 | `DEMO_MODE` | Cobra $0.01 por pago salvo que valga `false` |
 | `TEAM_SECRET` | Clave del equipo para entrar en `/entrar` mientras no hay inicio de sesión por WhatsApp |
 
+Los enlaces de cobro usan el dominio de producción que Vercel pone en
+`VERCEL_PROJECT_PRODUCTION_URL`; en local usan `http://localhost:3000`.
+
 ## Seguridad
 
 - Un cobro solo se marca pagado con un webhook de pey con firma válida o con la
   consulta de la transacción a pey, nunca por algo que mande el navegador.
 - Cada webhook se procesa una sola vez.
 - Cada persona recibe un enlace propio con un token aleatorio de 128 bits.
-- Las sesiones guardan solo el hash del token; crear cobros tiene límite por usuario y por IP.
-- Las páginas de cobro solo muestran el nombre de pila; nunca teléfonos ni
-  cuentas bancarias.
+- Las sesiones guardan solo el hash del token. Entrar y crear cobros tienen
+  límite por IP, y crear cobros también por usuario.
+- La página que abre quien debe solo muestra su nombre de pila; nunca
+  teléfonos ni cuentas bancarias.
 - Cada commit y el historial completo pasan por un escáner de secretos.

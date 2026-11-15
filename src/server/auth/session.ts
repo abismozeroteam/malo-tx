@@ -6,21 +6,16 @@ export const SESSION_DAYS = 30;
 
 export type SessionUser = { id: string; displayName: string };
 
-export async function createUser(db: Database, displayName: string): Promise<string> {
-  const [row] = await db.query<{ id: string }>("INSERT INTO users (display_name) VALUES ($1) RETURNING id", [displayName]);
-  return row.id;
-}
-
-export async function createSession(db: Database, userId: string, now = new Date()) {
+export async function signUp(db: Database, displayName: string) {
   const token = randomToken(32);
-  const expiresAt = new Date(now.getTime() + SESSION_DAYS * 86_400_000);
-  await db.query("INSERT INTO sessions (token_hash, user_id, created_at, expires_at) VALUES ($1, $2, $3, $4)", [
-    sha256(token),
-    userId,
-    now,
-    expiresAt,
-  ]);
-  return { token, expiresAt };
+  const expiresAt = new Date(Date.now() + SESSION_DAYS * 86_400_000);
+  const [row] = await db.query<{ user_id: string }>(
+    `WITH u AS (INSERT INTO users (display_name) VALUES ($1) RETURNING id)
+     INSERT INTO sessions (token_hash, user_id, expires_at) SELECT $2, id, $3 FROM u
+     RETURNING user_id`,
+    [displayName, sha256(token), expiresAt],
+  );
+  return { userId: row.user_id, token, expiresAt };
 }
 
 export async function findSessionUser(db: Database, token: string, now = new Date()): Promise<SessionUser | null> {
@@ -31,8 +26,4 @@ export async function findSessionUser(db: Database, token: string, now = new Dat
     [sha256(token), now],
   );
   return row ? { id: row.id, displayName: row.display_name } : null;
-}
-
-export async function revokeSession(db: Database, token: string) {
-  await db.query("UPDATE sessions SET revoked_at = now() WHERE token_hash = $1 AND revoked_at IS NULL", [sha256(token)]);
 }

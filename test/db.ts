@@ -8,12 +8,10 @@ export async function createTestDb(): Promise<Database> {
     for (const statement of statements) await pg.query(statement);
   }
   return {
-    query: async <T,>(text: string, values: unknown[] = []) => (await pg.query(text, values)).rows as T[],
+    query: async <T,>(text: string, values: unknown[] = []) => (await pg.query<T>(text, values)).rows,
     transaction: (statements) =>
       pg.transaction(async (tx) => {
-        const results: Record<string, unknown>[][] = [];
-        for (const s of statements) results.push((await tx.query(s.text, s.values ?? [])).rows as Record<string, unknown>[]);
-        return results;
+        for (const s of statements) await tx.query(s.text, s.values);
       }),
   };
 }

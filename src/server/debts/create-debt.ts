@@ -1,37 +1,43 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import type { CatalogMemeKey } from "@/contracts/common";
-import type { CreatedDebt, DebtFormValues } from "@/contracts/debt-form";
+import type { CreatedDebt, CreatedLink } from "@/contracts/debt-form";
 import { debtorAmounts, myShare } from "@/contracts/debt-form-rules";
-import { toTenDigitPhone } from "@/contracts/phone";
+import { toTenDigitPhone, toWhatsappNumber } from "@/contracts/phone";
+import { routes } from "@/contracts/routes";
 import { es } from "@/content/es";
 import { catalogMemeView, finalMemeView } from "@/content/memes";
 import type { Database } from "../db";
 import { randomToken } from "../tokens";
+import type { ValidDebtForm } from "../validation/debt-form";
 
-export const debtorUrl = (baseUrl: string, token: string) => `${baseUrl}/c/${token}`;
+type Debtor = { firstName: string; phone: string | null; amountCents: number; token: string };
 
 export function whatsappShareUrl(phone: string | null, text: string) {
-  const to = phone ? `52${phone}` : "";
-  return `https://wa.me/${to}?text=${encodeURIComponent(text)}`;
+  return `https://wa.me/${phone ? toWhatsappNumber(phone) : ""}?text=${encodeURIComponent(text)}`;
 }
 
-export async function createDebt(
-  db: Database,
-  creditorId: string,
-  values: DebtFormValues,
-  baseUrl: string,
-): Promise<CreatedDebt> {
-  if (!values.meme || values.totalCents === null) throw new Error("Validated values are required");
+function toLink(baseUrl: string, debtor: Debtor): CreatedLink {
+  const url = `${baseUrl}${routes.debtor(debtor.token)}`;
+  return {
+    firstName: debtor.firstName,
+    amountCents: debtor.amountCents,
+    url,
+    whatsappUrl: whatsappShareUrl(debtor.phone, es.created.shareText(debtor.firstName, url)),
+  };
+}
+
+export async function createDebt(db: Database, creditorId: string, values: ValidDebtForm, baseUrl: string): Promise<CreatedDebt> {
   const debtId = randomUUID();
   const ref = randomToken();
+  const name = values.name.trim();
+  const dueDate = values.dueDate || null;
   const meme = finalMemeView(values.meme, values.caption);
   const amounts = debtorAmounts(values);
-  const people = values.people.map((person, position) => ({
-    position,
+  const debtors: Debtor[] = values.people.map((person, i) => ({
     firstName: person.firstName.trim(),
-    phone: person.phone.trim() ? toTenDigitPhone(person.phone) : null,
-    amountCents: amounts[position],
+    phone: toTenDigitPhone(person.phone),
+    amountCents: amounts[i],
     token: randomToken(),
   }));
 
@@ -40,64 +46,45 @@ export async function createDebt(
       text: `INSERT INTO debts
                (id, ref, creditor_id, name, description, due_date, meme_kind, meme_key, caption, total_cents, creditor_share_cents)
              VALUES ($1, $2, $3, $4, $5, $6, 'catalog', $7, $8, $9, $10)`,
-      values: [
-        debtId,
-        ref,
-        creditorId,
-        values.name.trim(),
-        values.description.trim(),
-        values.dueDate || null,
-        meme.kind === "catalog" ? meme.key : null,
-        meme.caption,
-        values.totalCents,
-        myShare(values),
-      ],
+      values: [debtId, ref, creditorId, name, values.description.trim(), dueDate, values.meme.key, meme.caption, values.totalCents, myShare(values)],
     },
-    ...people.map((p) => ({
-      text: `INSERT INTO debtors (debt_id, position, first_name, phone, amount_cents, token)
-             VALUES ($1, $2, $3, $4, $5, $6)`,
-      values: [debtId, p.position, p.firstName, p.phone, p.amountCents, p.token],
+    ...debtors.map((d, position) => ({
+      text: `INSERT INTO debtors (debt_id, position, first_name, phone, amount_cents, token) VALUES ($1, $2, $3, $4, $5, $6)`,
+      values: [debtId, position, d.firstName, d.phone, d.amountCents, d.token],
     })),
   ]);
 
-  const created = await loadCreatedDebt(db, creditorId, ref, baseUrl);
-  if (!created) throw new Error("Created debt not found");
-  return created;
+  return { ref, name, totalCents: values.totalCents, dueDate, meme, links: debtors.map((d) => toLink(baseUrl, d)) };
 }
 
-type DebtRow = { id: string; name: string; due_date: string | null; meme_key: CatalogMemeKey; caption: string; total_cents: number };
-type DebtorRow = { first_name: string; phone: string | null; amount_cents: number; token: string };
+type CreatedDebtRow = {
+  name: string;
+  due_date: string | null;
+  meme_key: CatalogMemeKey;
+  caption: string;
+  total_cents: number;
+  debtors: { first_name: string; phone: string | null; amount_cents: number; token: string }[];
+};
 
-export async function loadCreatedDebt(
-  db: Database,
-  creditorId: string,
-  ref: string,
-  baseUrl: string,
-): Promise<CreatedDebt | null> {
-  const [debt] = await db.query<DebtRow>(
-    `SELECT id, name, to_char(due_date, 'YYYY-MM-DD') AS due_date, meme_key, caption, total_cents
-       FROM debts WHERE ref = $1 AND creditor_id = $2 AND deleted_at IS NULL`,
+export async function loadCreatedDebt(db: Database, creditorId: string, ref: string, baseUrl: string): Promise<CreatedDebt | null> {
+  const [row] = await db.query<CreatedDebtRow>(
+    `SELECT d.name, to_char(d.due_date, 'YYYY-MM-DD') AS due_date, d.meme_key, d.caption, d.total_cents,
+            json_agg(json_build_object('first_name', p.first_name, 'phone', p.phone, 'amount_cents', p.amount_cents, 'token', p.token)
+                     ORDER BY p.position) AS debtors
+       FROM debts d JOIN debtors p ON p.debt_id = d.id
+      WHERE d.ref = $1 AND d.creditor_id = $2 AND d.deleted_at IS NULL
+      GROUP BY d.id`,
     [ref, creditorId],
   );
-  if (!debt) return null;
-  const debtors = await db.query<DebtorRow>(
-    "SELECT first_name, phone, amount_cents, token FROM debtors WHERE debt_id = $1 ORDER BY position",
-    [debt.id],
-  );
+  if (!row) return null;
   return {
     ref,
-    name: debt.name,
-    totalCents: debt.total_cents,
-    dueDate: debt.due_date,
-    meme: catalogMemeView(debt.meme_key, debt.caption),
-    links: debtors.map((d) => {
-      const url = debtorUrl(baseUrl, d.token);
-      return {
-        firstName: d.first_name,
-        amountCents: d.amount_cents,
-        url,
-        whatsappUrl: whatsappShareUrl(d.phone, es.created.shareText(d.first_name, url)),
-      };
-    }),
+    name: row.name,
+    totalCents: row.total_cents,
+    dueDate: row.due_date,
+    meme: catalogMemeView(row.meme_key, row.caption),
+    links: row.debtors.map((d) =>
+      toLink(baseUrl, { firstName: d.first_name, phone: d.phone, amountCents: d.amount_cents, token: d.token }),
+    ),
   };
 }

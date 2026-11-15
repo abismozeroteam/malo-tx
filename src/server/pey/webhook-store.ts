@@ -4,7 +4,7 @@ import type { PeyEventStore } from "./webhook-handler";
 
 export const peyEventStore: PeyEventStore = {
   async save(event) {
-    const rows = (await db().query(
+    const rows = await db().query<{ id: string }>(
       `INSERT INTO pey_webhook_events
          (webhook_id, event_type, transaction_id, amount_cents, date_paid, payload)
        VALUES ($1, $2, $3, $4, $5, $6)
@@ -18,7 +18,7 @@ export const peyEventStore: PeyEventStore = {
         event.datePaid,
         JSON.stringify(event.payload),
       ],
-    )) as unknown[];
+    );
     return rows.length === 0 ? "duplicate" : "stored";
   },
 };

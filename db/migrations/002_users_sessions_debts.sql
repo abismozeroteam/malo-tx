@@ -53,6 +53,8 @@ CREATE TABLE IF NOT EXISTS debtors (
 
 CREATE TABLE IF NOT EXISTS rate_limits (
   key TEXT PRIMARY KEY,
-  window_start TIMESTAMPTZ NOT NULL,
-  count INTEGER NOT NULL
+  count INTEGER NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS rate_limits_expires_idx ON rate_limits (expires_at);
