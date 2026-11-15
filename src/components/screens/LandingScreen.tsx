@@ -6,7 +6,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { MemeCard } from "@/components/ui/MemeCard";
 import { PageHeading } from "@/components/ui/PageHeading";
 import { Screen } from "@/components/ui/Screen";
-import { Wordmark } from "@/components/ui/Wordmark";
+import { BrandName, Wordmark } from "@/components/ui/Wordmark";
 
 const t = es.landing;
 
@@ -22,7 +22,10 @@ export function LandingScreen() {
           <li key={point}>· {point}</li>
         ))}
       </ul>
-      <LinkButton href={routes.signIn}>{t.cta}</LinkButton>
+      <LinkButton href={routes.signIn} className="gap-1.5">
+        {t.cta}
+        <BrandName className="text-subtitle" />
+      </LinkButton>
     </Screen>
   );
 }

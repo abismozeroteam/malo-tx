@@ -53,7 +53,7 @@ export const es = {
       "Paga con CoDi desde la app de su banco. Sin cuentas nuevas.",
       "Te enteras en segundos cuando te paga.",
     ],
-    cta: "Entrar al negocio",
+    cta: "Entra a",
   },
 
   signIn: {
@@ -169,16 +169,16 @@ export const es = {
       over: (amount: string) => `Te pasaste por ${amount}.`,
       eachOwnLink: "Cada quien recibe su propio enlace. Nadie ve cuánto le toca a los demás.",
       ownWhatsapp: "Tú mandas el enlace desde tu WhatsApp. Nosotros no le escribimos a nadie.",
-      next: "Siguiente · Ponerle veneno",
+      next: "Siguiente · Hazlo tuyo",
     },
     style: {
-      heading: "Ponle veneno.",
+      heading: "Ponle tu toque.",
       lead: "Así lo va a ver tu deudor.",
       yourPart: (name: string) => `${name || "Tu deudor"} · Tu parte`,
       caption: "Texto del meme",
       captionHint: (max: number) => `Hasta ${max} caracteres. Si lo dejas vacío, usamos el del meme.`,
-      submit: "Soltar el cobro",
-      submitting: "Soltando…",
+      submit: "Crear el cobro",
+      submitting: "Creando…",
     },
     errors: {
       required: "Esto no puede ir vacío.",
@@ -202,7 +202,7 @@ export const es = {
     copied: "Copiado",
     downloadQr: "Descargar QR",
     qrHint: "Este QR abre el enlace del cobro, no cobra solo.",
-    toDashboard: "Ir a mis cobros",
+    toDashboard: "Crear otro cobro",
     shareText: (name: string, url: string) => `${name}, tienes un cobro pendiente conmigo: ${url}`,
   },
 

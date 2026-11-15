@@ -1,3 +1,4 @@
+import { es } from "@/content/es";
 import { cx } from "./cx";
 
 export function Wordmark({ className }: { className?: string }) {
@@ -6,4 +7,8 @@ export function Wordmark({ className }: { className?: string }) {
       Malo<span className="text-brand">TX</span>
     </p>
   );
+}
+
+export function BrandName({ className }: { className?: string }) {
+  return <span className={cx("font-heading", className)}>{es.brand.name}</span>;
 }
