@@ -6,6 +6,7 @@ import { routes } from "@/contracts/routes";
 import { es } from "@/content/es";
 import { formatDate, formatMoney } from "@/content/format";
 import { Button, LinkButton } from "@/components/ui/Button";
+import { Icon } from "@/components/ui/Icon";
 import { PageHeading } from "@/components/ui/PageHeading";
 import { Screen } from "@/components/ui/Screen";
 import { DebtPreview } from "./DebtFormScreen";
@@ -41,8 +42,9 @@ export function CreatedScreen({ debt, creditorName }: { debt: CreatedDebt; credi
           </li>
         ))}
       </ul>
-      <LinkButton href={routes.debts} variant="link" className="text-center text-body">
+      <LinkButton href={routes.debts} variant="link" className="inline-flex items-center justify-center gap-1 text-body">
         {t.toDashboard}
+        <Icon name="forward" className="size-4" />
       </LinkButton>
     </Screen>
   );
