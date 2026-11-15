@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { createTestDb } from "../../../test/db";
 import type { Database } from "../db";
 import { sha256 } from "../tokens";
-import { findSessionUser, SESSION_DAYS, signUp } from "./session";
+import { findSessionUser, SESSION_MS, signUp } from "./session";
 
 describe("sessions", () => {
   let db: Database;
@@ -25,10 +25,11 @@ describe("sessions", () => {
     expect(await findSessionUser(db, "nope")).toBeNull();
 
     const { token } = await signUp(db, "Eduardo");
-    const later = new Date(Date.now() + (SESSION_DAYS + 1) * 86_400_000);
+    const later = new Date(Date.now() + SESSION_MS + 60_000);
     expect(await findSessionUser(db, token, later)).toBeNull();
 
     await db.query("UPDATE sessions SET revoked_at = now()");
     expect(await findSessionUser(db, token)).toBeNull();
   });
 });
+

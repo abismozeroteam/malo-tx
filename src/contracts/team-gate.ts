@@ -1,4 +1,4 @@
-export type TeamGateError = "wrong_secret" | "invalid_name" | "rate_limited";
+export type TeamGateError = "invalid_name" | "rate_limited";
 
 export type TeamGateState = { error: TeamGateError | null };
 

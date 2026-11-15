@@ -53,7 +53,7 @@ npm run dev
 ```
 
 Con `DATABASE_URL` en `.env.local`, corre `npm run db:migrate` una vez. Abre
-http://localhost:3000/entrar y entra con el `TEAM_SECRET` de tu `.env.local`.
+http://localhost:3000/entrar y entra solo con tu nombre.
 La galería de pantallas con datos de prueba está en http://localhost:3000/dev/ui
 (solo en desarrollo).
 
@@ -76,7 +76,6 @@ Ver `.env.example`. Ningún valor real va en el repositorio.
 | `PEY_API_KEY` | Llave de la API de pey |
 | `PEY_WEBHOOK_SECRET` | Secreto para verificar los webhooks de pey |
 | `DEMO_MODE` | Cobra $0.01 por pago salvo que valga `false` |
-| `TEAM_SECRET` | Clave del equipo para entrar en `/entrar` mientras no hay inicio de sesión por WhatsApp |
 
 Producción vive en https://malotx.app. Los enlaces de cobro, el canonical y el
 sitemap usan el dominio de producción que Vercel pone en
@@ -91,7 +90,8 @@ sitemap usan el dominio de producción que Vercel pone en
   Un pago por CoDi gana sobre "Ya te pagué" y "No debo esto".
 - Cada webhook se procesa una sola vez.
 - Cada persona recibe un enlace propio con un token aleatorio de 128 bits.
-- Las sesiones guardan solo el hash del token. Entrar y crear cobros tienen
+- Para la demo se entra solo con un nombre. La sesión termina al cerrar el
+  navegador y caduca a las 12 horas; las sesiones guardan solo el hash del token. Entrar y crear cobros tienen
   límite por IP, y crear cobros también por usuario.
 - La página que abre quien debe solo muestra su nombre de pila; nunca
   teléfonos ni cuentas bancarias. Las páginas privadas (enlaces de cobro,

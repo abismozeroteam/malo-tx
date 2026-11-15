@@ -82,14 +82,12 @@ export const es = {
   },
 
   teamGate: {
-    title: "Entrada del equipo",
-    lead: "Mientras llega el inicio de sesión por WhatsApp, entra con la clave del equipo.",
-    secretLabel: "Clave del equipo",
+    title: "Entra a cobrar",
+    lead: "Solo dinos tu nombre. Tu sesión se cierra cuando cierras el navegador.",
     nameLabel: "Tu nombre",
     nameHint: "Así te verán quienes te deben.",
     submit: "Entrar",
     error: {
-      wrong_secret: "Esa clave no es.",
       invalid_name: `Escribe tu nombre, hasta ${LIMITS.firstName} letras.`,
       rate_limited: common.rateLimited,
     } satisfies Record<TeamGateError, string>,
