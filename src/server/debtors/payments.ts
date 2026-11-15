@@ -2,7 +2,7 @@ import "server-only";
 import { randomInt } from "node:crypto";
 import { OPEN_DEBTOR_STATUSES, type CodiQr, type DebtorAnswer, type DebtorStatus } from "@/contracts/debtor-page";
 import type { Database } from "../db";
-import { chargeAmountCents, DEMO_MAX_CENTS, pesosToCents } from "../pey/charge-rules";
+import { chargeAmountCents, DEMO_MAX_CENTS, pesosToCents, peyDate } from "../pey/charge-rules";
 import { createCodiPush, createCodiQr, getQrTransactions, getTransaction } from "../pey/client";
 import { DEBTOR_ID_KEY } from "../pey/webhook-event";
 import type { Phone } from "../validation/phone";
@@ -90,8 +90,7 @@ export async function markPaidFromPey(db: Database, pey: PeyCharges, refs: Payme
   const qr = refs.qr_id ? (await pey.qrTransactions(refs.qr_id)).items : [];
   const paid = [...push, ...qr].find((t) => t.status === "PAID");
   if (!paid) return false;
-  const paidAt = paid.datePaid ? new Date(paid.datePaid * 1000) : null;
-  return markPaid(db, refs.id, pesosToCents(paid.amount), paidAt, demoMode);
+  return markPaid(db, refs.id, pesosToCents(paid.amount), peyDate(paid.datePaid), demoMode);
 }
 
 export async function paymentStatus(db: Database, token: string) {

@@ -1,4 +1,5 @@
 import "server-only";
+import { PEY_CHECK_SECONDS } from "@/contracts/debtor-page";
 import type { Database } from "./db";
 
 const HOUR = 3600;
@@ -14,7 +15,7 @@ export const RATE_LIMITS = {
   pushesPerLink: { max: 3, seconds: DAY },
   pushesPerIp: { max: 20, seconds: DAY },
   answersPerIp: { max: 30, seconds: HOUR },
-  peyChecksPerLink: { max: 1, seconds: 30 },
+  peyChecksPerLink: { max: 1, seconds: PEY_CHECK_SECONDS },
 };
 
 export type Limit = { key: string; max: number; seconds: number };

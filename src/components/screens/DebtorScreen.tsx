@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ActionError, ActionResult } from "@/contracts/common";
-import { QR_MIN_LEFT_MS, type CodiQr, type DebtorPageActions, type DebtorPageData } from "@/contracts/debtor-page";
+import { PEY_CHECK_SECONDS, QR_MIN_LEFT_MS, type CodiQr, type DebtorPageActions, type DebtorPageData } from "@/contracts/debtor-page";
 import { routes } from "@/contracts/routes";
 import { catalogMemeView, debtorPageMeme, REPORTED_FALLBACK_KEY } from "@/content/memes";
 import { es } from "@/content/es";
@@ -307,7 +307,6 @@ const FAST_POLL_MS = 4000;
 const SLOW_POLL_MS = 15_000;
 const FAST_FOR_MS = 120_000;
 const STOP_AFTER_MS = 900_000;
-const PEY_CHECK_EVERY_MS = 30_000;
 
 function useRefreshWhenPaid(checkPaid: DebtorPageActions["checkPaid"], active: boolean) {
   const router = useRouter();
@@ -319,7 +318,7 @@ function useRefreshWhenPaid(checkPaid: DebtorPageActions["checkPaid"], active: b
     const tick = async () => {
       const elapsed = Date.now() - startedAt;
       if (document.hidden || elapsed > STOP_AFTER_MS) return;
-      const askPey = Date.now() - peyCheckedAt >= PEY_CHECK_EVERY_MS;
+      const askPey = Date.now() - peyCheckedAt >= PEY_CHECK_SECONDS * 1000;
       if (askPey) peyCheckedAt = Date.now();
       if (await checkPaid(askPey)) return router.refresh();
       timer = setTimeout(tick, elapsed < FAST_FOR_MS ? FAST_POLL_MS : SLOW_POLL_MS);

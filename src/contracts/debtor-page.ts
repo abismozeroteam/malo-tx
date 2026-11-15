@@ -8,6 +8,10 @@ export type CodiQr = { imageSrc: string; expiresAt: IsoDateTime };
 
 export const QR_MIN_LEFT_MS = 60_000;
 
+export const PEY_CHECK_SECONDS = 30;
+
+export const isTokenShape = (token: unknown): token is string => typeof token === "string" && token.length <= 64;
+
 export type DebtorAnswer = Extract<DebtorStatus, "claims_paid" | "disputed">;
 
 export type QrResult = { ok: true; qr: CodiQr } | { ok: false; error: ActionError };
