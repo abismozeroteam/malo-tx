@@ -1,0 +1,9 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public test values: the pey docs' example apiKeyId and the Standard Webhooks test vector secret"
+regexes = [
+  '''01M3QMMR6X9CBVDY1SF3G8QWNW''',
+  '''whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2La[L]aSw''',
+]

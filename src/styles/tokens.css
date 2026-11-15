@@ -1,0 +1,56 @@
+@theme {
+  --color-page: #fcfbfc;
+  --color-surface: #ffffff;
+  --color-ink: #000000;
+  --color-muted: #786d73;
+  --color-line: #ede6e9;
+  --color-on-brand: #ffffff;
+  --color-on-brand-muted: rgb(255 255 255 / 0.7);
+
+  --color-brand: #e5005f;
+  --color-brand-bright: #ff006a;
+  --color-brand-soft: #fff3f7;
+  --color-brand-ink: #7f0035;
+  --color-track: #f4e5ec;
+
+  --color-warning-soft: #fff4dc;
+  --color-warning-ink: #8b691e;
+  --color-success-soft: #eaf5e9;
+  --color-success-ink: #30683e;
+  --color-danger-soft: #fbecee;
+  --color-danger-ink: #ad4355;
+  --color-neutral-soft: #f4f0f2;
+  --color-neutral-ink: #786d73;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "casserole-lombardic", Georgia, serif;
+
+  --text-micro: 10px;
+  --text-caption: 11px;
+  --text-small: 12px;
+  --text-body: 13px;
+  --text-button: 15px;
+  --text-lead: 16px;
+  --text-subtitle: 19px;
+  --text-title: 23px;
+  --text-meme: 24px;
+  --text-wordmark: 29px;
+  --text-total: 30px;
+  --text-amount: 37px;
+  --text-hero: 44px;
+
+  --radius-tag: 9px;
+  --radius-small: 11px;
+  --radius-notice: 12px;
+  --radius-control: 13px;
+  --radius-field: 14px;
+  --radius-button: 16px;
+  --radius-card: 18px;
+  --radius-hero: 22px;
+
+  --leading-ui: 1.4;
+  --leading-meme: 1.18;
+  --leading-heading: 1.25;
+
+  --container-phone: 430px;
+}

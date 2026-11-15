@@ -9,7 +9,9 @@
     "lint": "eslint",
     "check": "next typegen && tsc --noEmit && eslint",
     "db:migrate": "node scripts/migrate.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepare": "node scripts/install-hooks.mjs",
+    "scan": "secretlint \"**/*\""
   },
   "dependencies": {
     "@neondatabase/serverless": "1.2.1",
@@ -17,20 +19,23 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "0.0.1",
+    "sharp": "0.35.5",
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@secretlint/secretlint-rule-preset-recommend": "13.1.0",
     "@tailwindcss/turbopack": "4.3.3",
-    "@types/node": "22.20.5",
+    "@types/node": "26.6.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "secretlint": "13.1.0",
     "tailwindcss": "4.3.3",
     "typescript": "^5",
     "vitest": "5.1.0"
   },
   "engines": {
-    "node": "22.x"
+    "node": "26.x"
   }
 }
