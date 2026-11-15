@@ -57,7 +57,7 @@ function PhoneStep({
     <Screen>
       <Wordmark className="self-center" />
       <section className="flex flex-1 flex-col justify-center gap-2 text-center">
-        <PageHeading size="subtitle" title={es.landing.headline} />
+        <PageHeading size="sm" title={es.landing.headline} />
         <p className="text-lead leading-ui">{es.landing.lead}</p>
       </section>
       <form onSubmit={submit} className="flex w-full flex-col gap-4">
