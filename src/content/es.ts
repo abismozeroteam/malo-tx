@@ -51,7 +51,7 @@ export const es = {
     points: [
       "Mándale a tu amigo un meme con su cobro.",
       "Paga con CoDi desde la app de su banco. Sin cuentas nuevas.",
-      "Te enteras en segundos cuando te paga.",
+      "El pago se confirma solo, en segundos. Sin comprobantes.",
     ],
     cta: "Quiero entrar a",
   },
