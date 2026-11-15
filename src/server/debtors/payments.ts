@@ -3,7 +3,7 @@ import { randomInt } from "node:crypto";
 import { OPEN_DEBTOR_STATUSES, type CodiQr, type DebtorAnswer, type DebtorStatus } from "@/contracts/debtor-page";
 import type { Database } from "../db";
 import { chargeAmountCents, DEMO_MAX_CENTS, pesosToCents } from "../pey/charge-rules";
-import { createCodiPush, createCodiQr, getQrTransactions } from "../pey/client";
+import { createCodiPush, createCodiQr, getQrTransactions, getTransaction } from "../pey/client";
 import { DEBTOR_ID_KEY } from "../pey/webhook-event";
 import type { Phone } from "../validation/phone";
 import type { DebtorRow } from "./debtor-page";
@@ -13,9 +13,15 @@ export type PeyCharges = {
   createQr: typeof createCodiQr;
   createPush: typeof createCodiPush;
   qrTransactions: typeof getQrTransactions;
+  transaction: typeof getTransaction;
 };
 
-export const peyCharges: PeyCharges = { createQr: createCodiQr, createPush: createCodiPush, qrTransactions: getQrTransactions };
+export const peyCharges: PeyCharges = {
+  createQr: createCodiQr,
+  createPush: createCodiPush,
+  qrTransactions: getQrTransactions,
+  transaction: getTransaction,
+};
 
 const OPEN_SQL = `status IN (${OPEN_DEBTOR_STATUSES.map((s) => `'${s}'`).join(", ")})`;
 
@@ -38,8 +44,9 @@ export async function ensureQr(db: Database, pey: PeyCharges, row: DebtorRow, de
   return freshQr(row.token, expiresAt, now)!;
 }
 
-export async function sendPush(pey: PeyCharges, row: DebtorRow, phone: Phone, demoMode: boolean) {
-  await pey.createPush({ ...charge(row, demoMode), phoneNumber: phone });
+export async function sendPush(db: Database, pey: PeyCharges, row: DebtorRow, phone: Phone, demoMode: boolean) {
+  const { transactionId } = await pey.createPush({ ...charge(row, demoMode), phoneNumber: phone });
+  await db.query("UPDATE debtors SET push_transaction_id = $2 WHERE id = $1", [row.id, transactionId]);
 }
 
 export async function answer(db: Database, debtorId: string, status: DebtorAnswer): Promise<boolean> {
@@ -76,17 +83,20 @@ export async function markPaid(db: Database, debtorId: string, paidCents: number
   return rows.length === 1;
 }
 
-export async function markPaidFromQr(db: Database, pey: PeyCharges, debtorId: string, qrId: string, demoMode: boolean) {
-  const { items } = await pey.qrTransactions(qrId);
-  const paid = items.find((t) => t.status === "PAID");
+type PaymentRefs = { id: string; qr_id: string | null; push_transaction_id: string | null };
+
+export async function markPaidFromPey(db: Database, pey: PeyCharges, refs: PaymentRefs, demoMode: boolean) {
+  const push = refs.push_transaction_id ? [await pey.transaction(refs.push_transaction_id)] : [];
+  const qr = refs.qr_id ? (await pey.qrTransactions(refs.qr_id)).items : [];
+  const paid = [...push, ...qr].find((t) => t.status === "PAID");
   if (!paid) return false;
   const paidAt = paid.datePaid ? new Date(paid.datePaid * 1000) : null;
-  return markPaid(db, debtorId, pesosToCents(paid.amount), paidAt, demoMode);
+  return markPaid(db, refs.id, pesosToCents(paid.amount), paidAt, demoMode);
 }
 
 export async function paymentStatus(db: Database, token: string) {
-  const [row] = await db.query<{ id: string; status: DebtorStatus; qr_id: string | null }>(
-    "SELECT id, status, qr_id FROM debtors WHERE token = $1",
+  const [row] = await db.query<PaymentRefs & { status: DebtorStatus }>(
+    "SELECT id, status, qr_id, push_transaction_id FROM debtors WHERE token = $1",
     [token],
   );
   return row ?? null;
