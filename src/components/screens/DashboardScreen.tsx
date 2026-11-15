@@ -124,14 +124,14 @@ function Greeting({ name, startEditing, rename }: { name: string; startEditing: 
             onChange={(e) => setValue(e.target.value)}
             maxLength={30}
             autoFocus
-            className="min-w-0 flex-1 rounded-control border border-line bg-surface px-3 py-2 text-title font-bold"
+            className="min-w-0 flex-1 rounded-control border border-line bg-surface px-3 py-2 font-heading text-title"
           />
           <Button size="sm" type="submit" className="w-auto px-4">
             {t.saveName}
           </Button>
         </form>
       ) : (
-        <h1 className="flex items-center gap-2 text-title font-bold leading-heading">
+        <h1 className="flex items-center gap-2 text-title leading-heading">
           {t.greeting(current)}
           <button type="button" onClick={() => setEditing(true)} aria-label={t.editName} className="text-lead text-muted">
             ✎

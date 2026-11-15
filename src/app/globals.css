@@ -7,6 +7,11 @@ body {
   font-family: var(--font-sans);
 }
 
+h1 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+}
+
 .meme-caption {
   text-transform: uppercase;
   text-wrap: balance;

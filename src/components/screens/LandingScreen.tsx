@@ -14,7 +14,7 @@ export function LandingScreen() {
     <Screen>
       <Wordmark className="self-center" />
       <MemeCard meme={catalogMemeView(DEFAULT_MEME_KEY)} important />
-      <h1 className="text-title font-bold leading-heading">{t.headline}</h1>
+      <h1 className="text-title leading-heading">{t.headline}</h1>
       <p className="text-lead leading-ui">{t.lead}</p>
       <ul className="flex flex-col gap-2 text-body leading-ui text-muted">
         {t.points.map((point) => (

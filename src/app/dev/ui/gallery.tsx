@@ -38,7 +38,7 @@ export function Gallery() {
   return (
     <div className="flex flex-col gap-8 bg-neutral-soft p-6">
       <header className="flex flex-col gap-2">
-        <h1 className="text-title font-bold">{es.gallery.title}</h1>
+        <h1 className="text-title">{es.gallery.title}</h1>
         <p className="text-body text-muted">{es.gallery.lead}</p>
         <div className="flex gap-2">
           {[360, 390, 430].map((w) => (
