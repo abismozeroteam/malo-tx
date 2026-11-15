@@ -5,6 +5,11 @@ export const RATE_LIMITS = {
   gatePerIp: 10,
   debtsPerUser: 30,
   debtsPerIp: 60,
+  qrPerLink: 30,
+  qrPerIp: 120,
+  pushesPerLink: 3,
+  pushesPerIp: 20,
+  answersPerIp: 30,
 };
 
 type Limit = { key: string; max: number };
