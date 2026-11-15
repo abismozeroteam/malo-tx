@@ -55,9 +55,9 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/:path((?!api/).*)",
+        source: "/:path*",
         has: [{ type: "host", value: "malo-tx.vercel.app" }],
-        destination: "https://malotx.app/:path",
+        destination: "https://malotx.app/:path*",
         permanent: true,
       },
     ];
