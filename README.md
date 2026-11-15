@@ -80,8 +80,9 @@ Ver `.env.example`. Ningún valor real va en el repositorio.
 Producción vive en https://malotx.app. Los enlaces de cobro, el canonical y el
 sitemap usan el dominio de producción que Vercel pone en
 `VERCEL_PROJECT_PRODUCTION_URL` (también en previews); en local usan
-`http://localhost:3000`. `malo-tx.vercel.app` redirige todo a `malotx.app`. El
-webhook de pey apunta a `https://malotx.app/api/webhooks/pey`.
+`http://localhost:3000`. `malo-tx.vercel.app` redirige todo a `malotx.app`
+(308, configurado en los dominios del proyecto en Vercel). El webhook de pey
+apunta a `https://malotx.app/api/webhooks/pey`.
 
 ## Seguridad
 
