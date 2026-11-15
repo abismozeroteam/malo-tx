@@ -38,6 +38,9 @@
   --text-total: 30px;
   --text-amount: 37px;
   --text-hero: 44px;
+  --text-heading-sm: 28px;
+  --text-heading-md: 34px;
+  --text-heading-lg: 48px;
 
   --radius-tag: 9px;
   --radius-small: 11px;
@@ -50,7 +53,7 @@
 
   --leading-ui: 1.4;
   --leading-meme: 1.18;
-  --leading-heading: 1.25;
+  --leading-heading: 1.1;
 
   --container-phone: 430px;
 }
