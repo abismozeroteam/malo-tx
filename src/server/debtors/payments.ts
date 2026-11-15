@@ -2,8 +2,8 @@ import "server-only";
 import { randomInt } from "node:crypto";
 import type { CodiQr, DebtorAnswer } from "@/contracts/debtor-page";
 import type { Database } from "../db";
-import { chargeAmountCents } from "../pey/charge-rules";
-import { createCodiPush, createCodiQr } from "../pey/client";
+import { chargeAmountCents, pesosToCents } from "../pey/charge-rules";
+import { createCodiPush, createCodiQr, getQrTransactions } from "../pey/client";
 import type { Phone } from "../validation/phone";
 import type { DebtorRow } from "./debtor-page";
 import { freshQr, QR_SECONDS } from "./qr";
@@ -49,4 +49,23 @@ export async function qrImage(db: Database, token: string): Promise<Buffer | nul
     [token],
   );
   return row ? Buffer.from(row.qr_image, "base64") : null;
+}
+
+export async function markPaidFromQr(
+  db: Database,
+  lookup: typeof getQrTransactions,
+  row: DebtorRow,
+  demoMode: boolean,
+): Promise<boolean> {
+  if (!row.qr_id) return false;
+  const expected = chargeAmountCents(row.amount_cents, demoMode);
+  const { items } = await lookup(row.qr_id);
+  const paid = items.find((t) => t.status === "PAID" && pesosToCents(t.amount) >= expected);
+  if (!paid) return false;
+  const rows = await db.query(
+    `UPDATE debtors SET status = 'paid', paid_at = coalesce(to_timestamp($2), now()), updated_at = now()
+      WHERE id = $1 AND status IN ('pending', 'claims_paid', 'disputed') RETURNING id`,
+    [row.id, paid.datePaid ?? null],
+  );
+  return rows.length === 1;
 }

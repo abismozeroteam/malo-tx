@@ -39,4 +39,5 @@ export type DebtorPageActions = {
   claimPaid(): Promise<ActionResult>;
   dispute(): Promise<ActionResult>;
   report(): Promise<ActionResult>;
+  checkPaid(): Promise<boolean>;
 };

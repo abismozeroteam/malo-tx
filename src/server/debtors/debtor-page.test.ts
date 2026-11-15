@@ -4,7 +4,7 @@ import { seedDebt } from "../../../test/debts";
 import type { Database } from "../db";
 import type { Phone } from "../validation/phone";
 import { findDebtor, findOpenDebtor, toDebtorPage } from "./debtor-page";
-import { answer, ensureQr, qrImage, sendPush, type PeyCharges } from "./payments";
+import { answer, ensureQr, markPaidFromQr, qrImage, sendPush, type PeyCharges } from "./payments";
 
 const now = new Date("2026-11-15T15:00:00Z");
 
@@ -89,5 +89,21 @@ describe("debtor page", () => {
     expect(await answer(db, row.id, "claims_paid")).toBe(true);
     expect(await answer(db, row.id, "disputed")).toBe(false);
     expect(toDebtorPage(await findDebtor(db, token), true, now)).toMatchObject({ status: "claims_paid", canAnswer: false });
+  });
+});
+
+describe("markPaidFromQr", () => {
+  it("marks paid when pey reports a paid transaction for the QR", async () => {
+    const db = await createTestDb();
+    const token = (await seedDebt(db)).tokens[0];
+    await ensureQr(db, fakePey(), (await findOpenDebtor(db, token))!, true);
+    const row = (await findOpenDebtor(db, token))!;
+
+    const pending = async () => ({ items: [{ id: "t", status: "PENDING" as const, amount: 0.01 }], nextToken: null });
+    expect(await markPaidFromQr(db, pending, row, true)).toBe(false);
+
+    const paid = async () => ({ items: [{ id: "t", status: "PAID" as const, amount: 0.01, datePaid: 1794760000 }], nextToken: null });
+    expect(await markPaidFromQr(db, paid, row, true)).toBe(true);
+    expect(toDebtorPage(await findDebtor(db, token), true)).toMatchObject({ state: "paid", paidAt: "2026-11-15T16:26:40.000Z" });
   });
 });

@@ -45,6 +45,7 @@ function OpenView({ data, actions }: { data: OpenData; actions: DebtorPageAction
   const [reported, setReported] = useState(false);
   const [error, setError] = useState<ActionError | null>(null);
   const qr = useFreshQr(data.qr, actions.requestQr);
+  useReloadWhenPaid(actions.checkPaid);
 
   const meme = reported ? catalogMemeView(REPORTED_FALLBACK_KEY, data.meme.caption) : debtorPageMeme(data);
   const amount = formatMoney(data.amountCents);
@@ -298,4 +299,15 @@ function useFreshQr(initial: CodiQr | null, requestQr: DebtorPageActions["reques
     };
   }, [qr, requestQr]);
   return qr;
+}
+
+const PAID_POLL_MS = 4000;
+
+function useReloadWhenPaid(checkPaid: DebtorPageActions["checkPaid"]) {
+  useEffect(() => {
+    const timer = setInterval(async () => {
+      if (!document.hidden && (await checkPaid())) window.location.reload();
+    }, PAID_POLL_MS);
+    return () => clearInterval(timer);
+  }, [checkPaid]);
 }

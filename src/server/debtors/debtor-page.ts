@@ -15,6 +15,7 @@ export type DebtorRow = {
   first_name: string;
   amount_cents: number;
   status: DebtorStatus;
+  qr_id: string | null;
   qr_expires_at: string | null;
   paid_at: string | null;
   debt_name: string;
@@ -30,7 +31,7 @@ export type DebtorRow = {
 export async function findDebtor(db: Database, token: string): Promise<DebtorRow | null> {
   if (token.length > 64) return null;
   const [row] = await db.query<DebtorRow>(
-    `SELECT p.id, p.token, p.first_name, p.amount_cents, p.status,
+    `SELECT p.id, p.token, p.first_name, p.amount_cents, p.status, p.qr_id,
             to_char(p.qr_expires_at AT TIME ZONE 'UTC', ${ISO}) AS qr_expires_at,
             to_char(p.paid_at AT TIME ZONE 'UTC', ${ISO}) AS paid_at,
             d.name AS debt_name, to_char(d.due_date, 'YYYY-MM-DD') AS due_date, d.meme_key, d.caption, d.total_cents,

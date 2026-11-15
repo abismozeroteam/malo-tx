@@ -14,6 +14,7 @@ export const RATE_LIMITS = {
   pushesPerLink: { max: 3, seconds: DAY },
   pushesPerIp: { max: 20, seconds: DAY },
   answersPerIp: { max: 30, seconds: HOUR },
+  peyChecksPerLink: { max: 1, seconds: 15 },
 };
 
 export type Limit = { key: string; max: number; seconds: number };
