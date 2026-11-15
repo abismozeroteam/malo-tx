@@ -53,7 +53,7 @@ export const es = {
       "Paga con CoDi desde la app de su banco. Sin cuentas nuevas.",
       "Te enteras en segundos cuando te paga.",
     ],
-    cta: "Entra a",
+    cta: "Quiero entrar a",
   },
 
   signIn: {

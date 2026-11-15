@@ -24,7 +24,7 @@ export function LandingScreen() {
       </ul>
       <LinkButton href={routes.signIn} className="gap-1.5">
         {t.cta}
-        <BrandName className="text-subtitle" />
+        <BrandName className="text-meme leading-none" />
       </LinkButton>
     </Screen>
   );
