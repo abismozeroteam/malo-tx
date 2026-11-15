@@ -1,5 +1,4 @@
-// TEMPORARY step 0 route: creates the $0.01 smoke-test QR and push and shows
-// the stored webhooks. Protected by TEAM_SECRET. Remove once step 1 exists.
+// Temporary: remove in step 1.
 import { isTeamSecret } from "@/server/auth/team-secret";
 import { db } from "@/server/db";
 import {

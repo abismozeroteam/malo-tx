@@ -6,11 +6,6 @@ import {
   type PeyPaymentEvent,
 } from "@/server/pey/webhook-payload";
 
-/**
- * pey webhook receiver. Verifies the Standard Webhooks signature on the raw
- * body, then stores each delivery once (keyed by webhook-id) with bank
- * details masked. Repeated deliveries return 200 and change nothing.
- */
 export async function POST(request: Request) {
   const secret = process.env.PEY_WEBHOOK_SECRET;
   if (!secret) {

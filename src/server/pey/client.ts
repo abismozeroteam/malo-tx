@@ -17,7 +17,6 @@ export class PeyError extends Error {
 
 type Metadata = Record<string, string | number | boolean | null>;
 
-/** Refuses any charge above $0.01 while DEMO_MODE is on. */
 function assertChargeAllowed(amountCents: number) {
   if (!Number.isInteger(amountCents) || amountCents <= 0) {
     throw new Error("Amount must be a positive integer of centavos");

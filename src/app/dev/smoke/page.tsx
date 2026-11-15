@@ -1,4 +1,4 @@
-// TEMPORARY step 0 page. Remove once step 1 exists.
+// Temporary: remove in step 1.
 import type { Metadata } from "next";
 import { SmokePanel } from "./smoke-panel";
 

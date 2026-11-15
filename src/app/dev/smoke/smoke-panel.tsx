@@ -1,5 +1,5 @@
 "use client";
-// TEMPORARY step 0 panel. Internal tool, English only. Remove once step 1 exists.
+// Temporary: remove in step 1.
 import { useState } from "react";
 
 type Result = { status: number; body: unknown };

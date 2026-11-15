@@ -1,6 +1,3 @@
-// Applies the SQL files in db/migrations in name order, once each.
-// Runs before every build. Skips quietly when DATABASE_URL is not set
-// (for example, a local build without a database).
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { neon } from "@neondatabase/serverless";
@@ -25,7 +22,7 @@ const files = (await readdir(dir)).filter((f) => f.endsWith(".sql")).sort();
 for (const file of files) {
   if (applied.has(file)) continue;
   const body = await readFile(path.join(dir, file), "utf8");
-  // One statement per query: the HTTP driver does not run multi-statement strings.
+  // The HTTP driver runs one statement per query.
   const statements = body
     .split(/;\s*(?:\r?\n|$)/)
     .map((s) => s.replace(/^\s*--.*$/gm, "").trim())

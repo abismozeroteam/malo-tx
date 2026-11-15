@@ -19,7 +19,6 @@ const mask = (value: unknown, keep = 4) => {
   return s.length <= keep ? "*".repeat(s.length) : "*".repeat(s.length - keep) + s.slice(-keep);
 };
 
-/** Copy of the payload with the payer's bank details masked, safe to store. */
 export function maskPayload(event: PeyPaymentEvent): PeyPaymentEvent {
   const copy: PeyPaymentEvent = structuredClone(event);
   if (copy.metadata) {
@@ -29,6 +28,5 @@ export function maskPayload(event: PeyPaymentEvent): PeyPaymentEvent {
   return copy;
 }
 
-/** pey sends amounts in pesos; we store integer centavos. */
 export const pesosToCents = (pesos: unknown) =>
   typeof pesos === "number" && Number.isFinite(pesos) ? Math.round(pesos * 100) : null;

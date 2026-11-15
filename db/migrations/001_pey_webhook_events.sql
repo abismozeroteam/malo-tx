@@ -1,5 +1,3 @@
--- Every verified pey webhook delivery, stored once per webhook-id.
--- The payload is stored with the payer's bank details masked.
 CREATE TABLE IF NOT EXISTS pey_webhook_events (
   id            BIGSERIAL PRIMARY KEY,
   webhook_id    TEXT NOT NULL UNIQUE,
