@@ -8,3 +8,5 @@ export const routes = {
   debtorQr: (token: string, version: number) => `/c/${token}/qr?v=${version}`,
   profile: "/perfil",
 };
+
+export const PRIVATE_PATHS = ["/c", routes.debts, routes.signIn, routes.profile, "/dev"];

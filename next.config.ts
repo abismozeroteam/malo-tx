@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { PRIVATE_PATHS } from "./src/contracts/routes";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -45,14 +46,10 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
-      {
-        source: "/dev/:path*",
+      ...PRIVATE_PATHS.map((path) => ({
+        source: `${path}/:path*`,
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
-      },
-      {
-        source: "/c/:path*",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
-      },
+      })),
     ];
   },
 };

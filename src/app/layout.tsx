@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { es } from "@/content/es";
+import { siteUrl } from "@/server/site-url";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -10,9 +11,10 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: es.brand.name,
+  metadataBase: new URL(siteUrl()),
+  title: { default: es.brand.name, template: `%s · ${es.brand.name}` },
   description: es.brand.tagline,
-  openGraph: { title: es.brand.name, description: es.brand.tagline, locale: "es_MX", type: "website" },
+  openGraph: { siteName: es.brand.name, locale: "es_MX", type: "website" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

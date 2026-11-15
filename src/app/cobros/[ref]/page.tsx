@@ -6,7 +6,7 @@ import { db } from "@/server/db";
 import { loadCreatedDebt } from "@/server/debts/create-debt";
 import { siteUrl } from "@/server/site-url";
 
-export const metadata = { title: `${es.created.title} · ${es.brand.name}` };
+export const metadata = { title: es.created.title };
 
 export default async function DebtPage({ params }: PageProps<"/cobros/[ref]">) {
   const user = await requireUser();
