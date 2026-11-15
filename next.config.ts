@@ -51,6 +51,16 @@ const nextConfig: NextConfig = {
       })),
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/:path((?!api/).*)",
+        has: [{ type: "host", value: "malo-tx.vercel.app" }],
+        destination: "https://malotx.app/:path",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
