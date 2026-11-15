@@ -50,3 +50,8 @@ export function maskEvent(event: PeyEvent): PeyEvent {
     },
   };
 }
+
+export const DEBTOR_ID_KEY = "debtorId";
+
+export const debtorIdOf = (event: PaymentEvent) =>
+  z.uuid().safeParse(event.metadata?.externalMetadata?.[DEBTOR_ID_KEY]).data ?? null;

@@ -23,7 +23,9 @@ $0.01 MXN.
 4. Quien debe abre el enlace y paga con CoDi: escanea el QR (dura 10 minutos y
    se renueva solo) o recibe la solicitud en la app de su banco. También puede
    responder una vez "Ya te pagué" o "No debo esto".
-5. pey confirma el pago y la página cambia a "Cobrado." en segundos.
+5. pey avisa del pago con un webhook firmado y la página de quien debe cambia
+   sola a "Cobrado." en segundos. Si el aviso tarda, la página le pregunta a
+   pey por los pagos del QR.
 
 ## Memes
 
@@ -85,7 +87,8 @@ sitemap usan el dominio de producción que Vercel pone en
 ## Seguridad
 
 - Un cobro solo se marca pagado con un webhook de pey con firma válida o con la
-  consulta de la transacción a pey, nunca por algo que mande el navegador.
+  consulta a pey de los pagos del QR, nunca por algo que mande el navegador.
+  Un pago por CoDi gana sobre "Ya te pagué" y "No debo esto".
 - Cada webhook se procesa una sola vez.
 - Cada persona recibe un enlace propio con un token aleatorio de 128 bits.
 - Las sesiones guardan solo el hash del token. Entrar y crear cobros tienen
@@ -98,6 +101,6 @@ sitemap usan el dominio de producción que Vercel pone en
   QR ni solicitudes.
 - El número que se escribe para la solicitud al banco solo se manda a pey; no
   se guarda.
-- Pedir QR, mandar solicitudes y responder tienen límite por enlace y por IP
+- Pedir QR, mandar solicitudes, responder y consultar a pey tienen límite por enlace y por IP
   (`RATE_LIMITS` en `src/server/rate-limit.ts`).
 - Cada commit y el historial completo pasan por un escáner de secretos.

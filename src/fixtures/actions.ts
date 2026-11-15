@@ -13,6 +13,7 @@ export const debtorActionsFixture: DebtorPageActions = {
   claimPaid: ok,
   dispute: ok,
   report: ok,
+  checkPaid: async () => false,
 };
 
 export const dashboardActionsFixture: DashboardActions = { rename: ok };

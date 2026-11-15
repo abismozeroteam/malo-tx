@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { es } from "@/content/es";
 import { DebtorScreen } from "@/components/screens/DebtorScreen";
-import { claimPaidAction, disputeAction, reportAction, requestQrAction, sendPushAction } from "@/server/actions/debtor";
+import { checkPaidAction, claimPaidAction, disputeAction, reportAction, requestQrAction, sendPushAction } from "@/server/actions/debtor";
 import { loadDebtor, toDebtorPage } from "@/server/debtors/debtor-page";
 import { isDemoMode } from "@/server/env";
 
@@ -22,6 +22,7 @@ export default async function DebtorPage({ params }: PageProps<"/c/[token]">) {
         claimPaid: claimPaidAction.bind(null, token),
         dispute: disputeAction.bind(null, token),
         report: reportAction,
+        checkPaid: checkPaidAction.bind(null, token),
       }}
     />
   );

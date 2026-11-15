@@ -1,11 +1,12 @@
 import { pesosToCents } from "./charge-rules";
 import { verifyStandardWebhook } from "./standard-webhooks";
-import { isPaymentEvent, maskEvent, peyEventSchema, type PeyEvent } from "./webhook-event";
+import { debtorIdOf, isPaymentEvent, maskEvent, peyEventSchema, type PeyEvent } from "./webhook-event";
 
 export type StoredPeyEvent = {
   webhookId: string;
   eventType: string;
   transactionId: string | null;
+  debtorId: string | null;
   amountCents: number | null;
   datePaid: Date | null;
   payload: PeyEvent;
@@ -51,6 +52,7 @@ export async function handlePeyWebhook(input: {
     webhookId: verified.webhookId,
     eventType: event.type,
     transactionId: payment?.transactionId ?? null,
+    debtorId: payment ? debtorIdOf(payment) : null,
     amountCents: payment ? pesosToCents(payment.amount) : null,
     datePaid: payment?.datePaid ? new Date(payment.datePaid * 1000) : null,
     payload: maskEvent(event),

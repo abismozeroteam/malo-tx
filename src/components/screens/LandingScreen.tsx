@@ -22,7 +22,10 @@ export function LandingScreen() {
           <li key={point}>· {point}</li>
         ))}
       </ul>
-      <LinkButton href={routes.signIn}>{t.cta}</LinkButton>
+      <LinkButton href={routes.signIn} className="gap-1.5">
+        {t.cta}
+        <span className="-translate-y-px font-heading font-normal text-wordmark leading-none">{es.brand.name}</span>
+      </LinkButton>
     </Screen>
   );
 }

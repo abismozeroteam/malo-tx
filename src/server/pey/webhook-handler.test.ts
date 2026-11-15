@@ -98,4 +98,14 @@ describe("handlePeyWebhook", () => {
     const result = await handle(body, signed(body), store);
     expect(result.log).not.toContain(PAYER_CLABE);
   });
+
+  it("reads the debtor id from externalMetadata only when it is a uuid", async () => {
+    const debtorId = "6f1c1d2e-8a4b-4c3d-9e2f-0a1b2c3d4e5f";
+    const withId = JSON.stringify({ ...qrPaymentEvent, metadata: { ...qrPaymentEvent.metadata, externalMetadata: { debtorId } } });
+    const { store, saved } = memoryStore();
+    await handle(withId, signed(withId, "a"), store);
+    await handle(body, signed(body, "b"), store);
+    expect(saved.get("a")?.debtorId).toBe(debtorId);
+    expect(saved.get("b")?.debtorId).toBeNull();
+  });
 });

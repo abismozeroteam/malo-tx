@@ -1,3 +1,0 @@
-import { z } from "zod";
-
-export const peyIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/);

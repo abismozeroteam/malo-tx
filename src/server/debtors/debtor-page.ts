@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import type { CatalogMemeKey } from "@/contracts/common";
-import type { DebtorPageData, DebtorStatus } from "@/contracts/debtor-page";
+import { OPEN_DEBTOR_STATUSES, type DebtorPageData, type DebtorStatus } from "@/contracts/debtor-page";
 import { todayInMexicoCity } from "@/content/format";
 import { catalogMemeView } from "@/content/memes";
 import { db, type Database } from "../db";
@@ -45,7 +45,7 @@ export async function findDebtor(db: Database, token: string): Promise<DebtorRow
 
 export const loadDebtor = cache((token: string) => findDebtor(db(), token));
 
-export const isOpen = (row: DebtorRow) => !row.deleted && row.status !== "paid" && row.status !== "cancelled";
+export const isOpen = (row: DebtorRow) => !row.deleted && (OPEN_DEBTOR_STATUSES as readonly DebtorStatus[]).includes(row.status);
 
 export async function findOpenDebtor(db: Database, token: unknown): Promise<DebtorRow | null> {
   if (typeof token !== "string") return null;

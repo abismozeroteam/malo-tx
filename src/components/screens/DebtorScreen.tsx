@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { ActionError, ActionResult } from "@/contracts/common";
 import { QR_MIN_LEFT_MS, type CodiQr, type DebtorPageActions, type DebtorPageData } from "@/contracts/debtor-page";
 import { routes } from "@/contracts/routes";
@@ -45,6 +46,8 @@ function OpenView({ data, actions }: { data: OpenData; actions: DebtorPageAction
   const [reported, setReported] = useState(false);
   const [error, setError] = useState<ActionError | null>(null);
   const qr = useFreshQr(data.qr, actions.requestQr);
+
+  useRefreshWhenPaid(actions.checkPaid, showPay && qr !== null);
 
   const meme = reported ? catalogMemeView(REPORTED_FALLBACK_KEY, data.meme.caption) : debtorPageMeme(data);
   const amount = formatMoney(data.amountCents);
@@ -298,4 +301,40 @@ function useFreshQr(initial: CodiQr | null, requestQr: DebtorPageActions["reques
     };
   }, [qr, requestQr]);
   return qr;
+}
+
+const FAST_POLL_MS = 4000;
+const SLOW_POLL_MS = 15_000;
+const FAST_FOR_MS = 120_000;
+const STOP_AFTER_MS = 900_000;
+const PEY_CHECK_EVERY_MS = 30_000;
+
+function useRefreshWhenPaid(checkPaid: DebtorPageActions["checkPaid"], active: boolean) {
+  const router = useRouter();
+  useEffect(() => {
+    if (!active) return;
+    let timer: ReturnType<typeof setTimeout>;
+    let startedAt = Date.now();
+    let peyCheckedAt = Date.now();
+    const tick = async () => {
+      const elapsed = Date.now() - startedAt;
+      if (document.hidden || elapsed > STOP_AFTER_MS) return;
+      const askPey = Date.now() - peyCheckedAt >= PEY_CHECK_EVERY_MS;
+      if (askPey) peyCheckedAt = Date.now();
+      if (await checkPaid(askPey)) return router.refresh();
+      timer = setTimeout(tick, elapsed < FAST_FOR_MS ? FAST_POLL_MS : SLOW_POLL_MS);
+    };
+    const restart = () => {
+      if (document.hidden) return;
+      clearTimeout(timer);
+      startedAt = Date.now();
+      void tick();
+    };
+    timer = setTimeout(tick, FAST_POLL_MS);
+    document.addEventListener("visibilitychange", restart);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", restart);
+    };
+  }, [checkPaid, active, router]);
 }

@@ -1,23 +1,30 @@
 import "server-only";
 import { randomInt } from "node:crypto";
-import type { CodiQr, DebtorAnswer } from "@/contracts/debtor-page";
+import { OPEN_DEBTOR_STATUSES, type CodiQr, type DebtorAnswer, type DebtorStatus } from "@/contracts/debtor-page";
 import type { Database } from "../db";
-import { chargeAmountCents } from "../pey/charge-rules";
-import { createCodiPush, createCodiQr } from "../pey/client";
+import { chargeAmountCents, DEMO_MAX_CENTS, pesosToCents } from "../pey/charge-rules";
+import { createCodiPush, createCodiQr, getQrTransactions } from "../pey/client";
+import { DEBTOR_ID_KEY } from "../pey/webhook-event";
 import type { Phone } from "../validation/phone";
 import type { DebtorRow } from "./debtor-page";
 import { freshQr, QR_SECONDS } from "./qr";
 
-export type PeyCharges = { createQr: typeof createCodiQr; createPush: typeof createCodiPush };
+export type PeyCharges = {
+  createQr: typeof createCodiQr;
+  createPush: typeof createCodiPush;
+  qrTransactions: typeof getQrTransactions;
+};
 
-export const peyCharges: PeyCharges = { createQr: createCodiQr, createPush: createCodiPush };
+export const peyCharges: PeyCharges = { createQr: createCodiQr, createPush: createCodiPush, qrTransactions: getQrTransactions };
+
+const OPEN_SQL = `status IN (${OPEN_DEBTOR_STATUSES.map((s) => `'${s}'`).join(", ")})`;
 
 const charge = (row: DebtorRow, demoMode: boolean) => ({
   amountCents: chargeAmountCents(row.amount_cents, demoMode),
   concept: row.debt_name.slice(0, 40),
   expirationSeconds: QR_SECONDS,
   numRef: String(randomInt(1, 10_000_000)),
-  metadata: { debtorId: row.id },
+  metadata: { [DEBTOR_ID_KEY]: row.id },
 });
 
 export async function ensureQr(db: Database, pey: PeyCharges, row: DebtorRow, demoMode: boolean, now = new Date()): Promise<CodiQr> {
@@ -45,8 +52,42 @@ export async function answer(db: Database, debtorId: string, status: DebtorAnswe
 
 export async function qrImage(db: Database, token: string): Promise<Buffer | null> {
   const [row] = await db.query<{ qr_image: string }>(
-    "SELECT qr_image FROM debtors WHERE token = $1 AND qr_expires_at > now() AND status IN ('pending', 'claims_paid', 'disputed')",
+    `SELECT qr_image FROM debtors WHERE token = $1 AND qr_expires_at > now() AND ${OPEN_SQL}`,
     [token],
   );
   return row ? Buffer.from(row.qr_image, "base64") : null;
+}
+
+export const demoChargeCents = (demoMode: boolean) => (demoMode ? DEMO_MAX_CENTS : null);
+
+export const markPaidSql = (p: { id: string; paidCents: string; paidAt: string; demoCents: string }) =>
+  `UPDATE debtors SET status = 'paid', settlement = 'codi', paid_at = coalesce(${p.paidAt}, now()), updated_at = now()
+    WHERE id = ${p.id} AND ${OPEN_SQL} AND ${p.paidCents} >= coalesce(${p.demoCents}, amount_cents)
+      AND NOT EXISTS (SELECT 1 FROM debts d WHERE d.id = debtors.debt_id AND d.deleted_at IS NOT NULL)
+    RETURNING debtors.id`;
+
+export async function markPaid(db: Database, debtorId: string, paidCents: number, paidAt: Date | null, demoMode: boolean) {
+  const rows = await db.query(markPaidSql({ id: "$1", paidCents: "$2", paidAt: "$3", demoCents: "$4" }), [
+    debtorId,
+    paidCents,
+    paidAt,
+    demoChargeCents(demoMode),
+  ]);
+  return rows.length === 1;
+}
+
+export async function markPaidFromQr(db: Database, pey: PeyCharges, debtorId: string, qrId: string, demoMode: boolean) {
+  const { items } = await pey.qrTransactions(qrId);
+  const paid = items.find((t) => t.status === "PAID");
+  if (!paid) return false;
+  const paidAt = paid.datePaid ? new Date(paid.datePaid * 1000) : null;
+  return markPaid(db, debtorId, pesosToCents(paid.amount), paidAt, demoMode);
+}
+
+export async function paymentStatus(db: Database, token: string) {
+  const [row] = await db.query<{ id: string; status: DebtorStatus; qr_id: string | null }>(
+    "SELECT id, status, qr_id FROM debtors WHERE token = $1",
+    [token],
+  );
+  return row ?? null;
 }
