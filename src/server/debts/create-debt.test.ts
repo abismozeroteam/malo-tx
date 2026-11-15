@@ -93,3 +93,12 @@ describe("loadCreatedDebt", () => {
     expect(created.dueDate).toBe("2026-11-30");
   });
 });
+
+describe("share text", () => {
+  it("has no emoji, which WhatsApp Desktop mangles in wa.me links", async () => {
+    const db = await createTestDb();
+    const owner = (await signUp(db, "Eduardo")).userId;
+    const [link] = (await createDebt(db, owner, values, "https://malo.test")).links;
+    expect(decodeURIComponent(link.whatsappUrl)).not.toMatch(/\p{Extended_Pictographic}/u);
+  });
+});
